@@ -1,0 +1,9 @@
+﻿{
+  "exclude": [
+    "**/.venv",
+    "**/venv",
+    "**/site-packages"
+  ],
+  "reportMissingImports": false,
+  "reportUndefinedVariable": false
+}

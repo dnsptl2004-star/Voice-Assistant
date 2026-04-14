@@ -1,0 +1,6 @@
+
+> voice-assistant-frontend@1.0.0 start
+> set "NODE_OPTIONS=--no-deprecation" && react-scripts start
+
+Starting the development server...
+

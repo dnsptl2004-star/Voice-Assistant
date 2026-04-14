@@ -1,0 +1,10 @@
+opencv-python
+mediapipe
+numpy
+sounddevice
+openai-whisper
+torch
+vosk
+SpeechRecognition
+pygame
+ultralytics
