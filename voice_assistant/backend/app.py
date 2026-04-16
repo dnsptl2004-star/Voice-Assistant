@@ -1015,7 +1015,7 @@ def normalize_browser_name(app_name):
 def get_available_browser():
     """Pick the first available browser installed on this machine."""
     for candidate in BROWSER_CANDIDATES:
-        if is_windows_target_available(candidate):
+        if is_command_available(candidate):
             return candidate
     return "msedge"
 
@@ -1167,7 +1167,7 @@ def launch_windows_target(target):
             log_event("launch_windows_target_success", target=normalized, mode="cmd-uri")
             return
 
-    if is_windows_target_available(normalized):
+    if is_command_available(normalized):
         resolved_target = resolve_windows_target_path(normalized) or normalized
         launched, detail = start_process_with_powershell(resolved_target)
         if launched:
@@ -1217,7 +1217,7 @@ def open_url(url, browser_hint=""):
     if browser_target not in BROWSER_CANDIDATES:
         browser_target = get_available_browser()
     try:
-        if browser_target in BROWSER_CANDIDATES and is_windows_target_available(browser_target):
+        if browser_target in BROWSER_CANDIDATES and is_command_available(browser_target):
             resolved_browser = resolve_windows_target_path(browser_target) or browser_target
             launched, _ = start_process_with_powershell(resolved_browser, [url])
             if launched and wait_for_process(browser_target):
