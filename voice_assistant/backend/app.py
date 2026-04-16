@@ -1055,18 +1055,21 @@ def get_web_target(name):
     return None
 
 
-def is_windows_target_available(target):
+def is_command_available(target):
     """Check whether a command or executable is available."""
     normalized = sanitize_spoken_text(target)
     if not normalized:
         return False
-    result = subprocess.run(
-        ["where.exe", normalized],
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
-    return result.returncode == 0
+    try:
+        result = subprocess.run(
+            ["where", normalized],
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
 
 
 def resolve_windows_target_path(target):
@@ -1074,28 +1077,36 @@ def resolve_windows_target_path(target):
     normalized = sanitize_spoken_text(target)
     if not normalized:
         return ""
-    result = subprocess.run(
-        ["where.exe", normalized],
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
-    if result.returncode != 0:
+    try:
+        result = subprocess.run(
+            ["where", normalized],
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+        if result.returncode != 0:
+            return ""
+        matches = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        return matches[0] if matches else ""
+    except Exception:
         return ""
-    matches = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    return matches[0] if matches else ""
 
 
 def is_process_running(executable_name):
     """Check whether an executable is already running."""
+    if IS_CLOUD:
+        return False
     process_name = executable_name if executable_name.endswith(".exe") else f"{executable_name}.exe"
-    result = subprocess.run(
-        ["tasklist", "/FI", f"IMAGENAME eq {process_name}"],
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
-    return process_name.lower() in result.stdout.lower()
+    try:
+        result = subprocess.run(
+            ["tasklist", "/FI", f"IMAGENAME eq {process_name}"],
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+        return process_name.lower() in result.stdout.lower()
+    except Exception:
+        return False
 
 
 def wait_for_process(executable_name, attempts=8, delay=0.2):
@@ -1117,7 +1128,7 @@ def start_process_with_powershell(file_path, arguments=None):
         ["powershell.exe", "-NoProfile", "-Command", command],
         capture_output=True,
         text=True,
-        shell=False,
+        shell=True,
     )
     log_event(
         "powershell_start_process",
@@ -1152,7 +1163,7 @@ def launch_windows_target(target):
             if launched:
                 log_event("launch_windows_target_success", target=normalized, mode="uri")
                 return
-            subprocess.Popen(["cmd", "/c", "start", "", normalized], shell=False)
+            subprocess.Popen(["cmd", "/c", "start", "", normalized], shell=True)
             log_event("launch_windows_target_success", target=normalized, mode="cmd-uri")
             return
 
@@ -1178,7 +1189,7 @@ def launch_windows_target(target):
         pass
 
     try:
-        subprocess.Popen([normalized], shell=False)
+        subprocess.Popen([normalized], shell=True)
         if wait_for_process(normalized, attempts=4, delay=0.25):
             log_event("launch_windows_target_success", target=normalized, mode="popen-process-running")
             return
@@ -1189,7 +1200,7 @@ def launch_windows_target(target):
         ["cmd", "/c", "start", "", normalized],
         capture_output=True,
         text=True,
-        shell=False,
+        shell=True,
     )
     if fallback.returncode == 0:
         if wait_for_process(normalized, attempts=4, delay=0.25):
@@ -1212,7 +1223,7 @@ def open_url(url, browser_hint=""):
             if launched and wait_for_process(browser_target):
                 log_event("open_url_success", url=url, browser=browser_target, mode="powershell-browser-process-running")
                 return True
-            subprocess.Popen([browser_target, url], shell=False)
+            subprocess.Popen([browser_target, url], shell=True)
             if wait_for_process(browser_target):
                 log_event("open_url_success", url=url, browser=browser_target, mode="popen-browser-process-running")
                 return True
@@ -1235,7 +1246,7 @@ def open_url(url, browser_hint=""):
             ["cmd", "/c", "start", "", url],
         ):
             try:
-                subprocess.Popen(command, shell=False)
+                subprocess.Popen(command, shell=True)
                 if wait_for_process(browser_target, attempts=4, delay=0.25):
                     log_event("open_url_success", url=url, browser=browser_target or "default", mode="fallback-command-process-running")
                     return True
@@ -2292,7 +2303,7 @@ def handle_system_info(params):
     
     try:
         if action == "system_info":
-            subprocess.Popen(["msinfo32.exe"], shell=False)
+            subprocess.Popen(["msinfo32.exe"], shell=True)
             return {"success": True, "message": "System Information opened"}
         elif action == "network_status":
             subprocess.Popen(["ncpa.cpl"], shell=True)
@@ -2301,70 +2312,70 @@ def handle_system_info(params):
             subprocess.Popen(["taskmgr"], shell=True)
             return {"success": True, "message": "Task Manager opened"}
         elif action == "disk_space":
-            result = subprocess.run(["wmic", "logicaldisk", "get", "size,freespace,caption"], capture_output=True, text=True, shell=False)
+            result = subprocess.run(["wmic", "logicaldisk", "get", "size,freespace,caption"], capture_output=True, text=True, shell=True)
             return {"success": True, "message": f"Disk space info:\n{result.stdout}"}
         elif action == "memory_usage":
-            result = subprocess.run(["wmic", "OS", "get", "TotalVisibleMemorySize,FreePhysicalMemory"], capture_output=True, text=True, shell=False)
+            result = subprocess.run(["wmic", "OS", "get", "TotalVisibleMemorySize,FreePhysicalMemory"], capture_output=True, text=True, shell=True)
             return {"success": True, "message": f"Memory usage info:\n{result.stdout}"}
         elif action == "cpu_usage":
             # Open Performance Monitor for CPU
-            subprocess.Popen(["perfmon"], shell=False)
+            subprocess.Popen(["perfmon"], shell=True)
             return {"success": True, "message": "Performance Monitor opened - check CPU usage"}
         elif action == "battery_status":
-            result = subprocess.run(["wmic", "path", "Win32_Battery", "get", "EstimatedChargeRemaining,BatteryStatus"], capture_output=True, text=True, shell=False)
+            result = subprocess.run(["wmic", "path", "Win32_Battery", "get", "EstimatedChargeRemaining,BatteryStatus"], capture_output=True, text=True, shell=True)
             return {"success": True, "message": f"Battery status:\n{result.stdout}"}
         elif action == "network_speed":
             open_url("https://www.speedtest.net")
             return {"success": True, "message": "Speed test opened in browser"}
         elif action == "firewall_status":
-            subprocess.Popen(["wf.msc"], shell=False)
+            subprocess.Popen(["wf.msc"], shell=True)
             return {"success": True, "message": "Windows Firewall opened"}
         elif action == "antivirus_status":
             subprocess.Popen(["windowsdefender://"], shell=True)
             return {"success": True, "message": "Windows Defender opened"}
         elif action == "event_logs":
-            subprocess.Popen(["eventvwr.msc"], shell=False)
+            subprocess.Popen(["eventvwr.msc"], shell=True)
             return {"success": True, "message": "Event Viewer opened"}
         elif action == "services":
-            subprocess.Popen(["services.msc"], shell=False)
+            subprocess.Popen(["services.msc"], shell=True)
             return {"success": True, "message": "Services opened"}
         elif action == "startup":
-            subprocess.Popen(["taskmgr", "/0", "/startup"], shell=False)
+            subprocess.Popen(["taskmgr", "/0", "/startup"], shell=True)
             return {"success": True, "message": "Task Manager opened to startup tab"}
         elif action == "device_manager":
-            subprocess.Popen(["devmgmt.msc"], shell=False)
+            subprocess.Popen(["devmgmt.msc"], shell=True)
             return {"success": True, "message": "Device Manager opened"}
         elif action == "system_properties":
-            subprocess.Popen(["sysdm.cpl"], shell=False)
+            subprocess.Popen(["sysdm.cpl"], shell=True)
             return {"success": True, "message": "System Properties opened"}
         elif action == "advanced_settings":
-            subprocess.Popen(["sysdm.cpl", ",,3"], shell=False)
+            subprocess.Popen(["sysdm.cpl", ",,3"], shell=True)
             return {"success": True, "message": "Advanced system settings opened"}
         elif action == "env_variables":
-            subprocess.Popen(["sysdm.cpl", ",,3"], shell=False)
+            subprocess.Popen(["sysdm.cpl", ",,3"], shell=True)
             time.sleep(1)
             pyautogui.hotkey('alt', 'e')
             return {"success": True, "message": "Environment variables opened"}
         elif action == "performance_monitor":
-            subprocess.Popen(["perfmon"], shell=False)
+            subprocess.Popen(["perfmon"], shell=True)
             return {"success": True, "message": "Performance Monitor opened"}
         elif action == "resource_monitor":
-            subprocess.Popen(["resmon"], shell=False)
+            subprocess.Popen(["resmon"], shell=True)
             return {"success": True, "message": "Resource Monitor opened"}
         elif action == "reliability_monitor":
-            subprocess.Popen(["perfmon", "/rel"], shell=False)
+            subprocess.Popen(["perfmon", "/rel"], shell=True)
             return {"success": True, "message": "Reliability Monitor opened"}
         elif action == "health_check":
             # Run basic health check
             checks = []
             try:
-                result = subprocess.run(["wmic", "OS", "get", "FreePhysicalMemory"], capture_output=True, text=True, shell=False)
+                result = subprocess.run(["wmic", "OS", "get", "FreePhysicalMemory"], capture_output=True, text=True, shell=True)
                 checks.append("Memory check completed")
             except:
                 checks.append("Memory check failed")
             
             try:
-                result = subprocess.run(["ping", "-n", "1", "8.8.8.8"], capture_output=True, text=True, shell=False)
+                result = subprocess.run(["ping", "-n", "1", "8.8.8.8"], capture_output=True, text=True, shell=True)
                 checks.append("Network connectivity check completed")
             except:
                 checks.append("Network check failed")
@@ -2383,10 +2394,10 @@ def handle_network_tool(params):
     
     try:
         if action == "ping":
-            result = subprocess.run(["ping", "-n", "4", target], capture_output=True, text=True, shell=False)
+            result = subprocess.run(["ping", "-n", "4", target], capture_output=True, text=True, shell=True)
             return {"success": True, "message": f"Ping results for {target}:\n{result.stdout}"}
         elif action == "traceroute":
-            result = subprocess.run(["tracert", target], capture_output=True, text=True, shell=False)
+            result = subprocess.run(["tracert", target], capture_output=True, text=True, shell=True)
             return {"success": True, "message": f"Traceroute results for {target}:\n{result.stdout}"}
         elif action == "flush_dns":
             result = subprocess.run(["ipconfig", "/flushdns"], capture_output=True, text=True, shell=True)
@@ -2420,20 +2431,20 @@ def handle_automation(params):
             shortcut_path = desktop / f"{target}.lnk"
             # Use PowerShell to create shortcut
             command = f"$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('{shortcut_path}'); $s.TargetPath = '{target}'; $s.Save()"
-            result = subprocess.run(["powershell.exe", "-Command", command], capture_output=True, text=True, shell=False)
+            result = subprocess.run(["powershell.exe", "-Command", command], capture_output=True, text=True, shell=True)
             if result.returncode == 0:
                 return {"success": True, "message": f"Shortcut created for {target} on desktop"}
             else:
                 return {"success": False, "message": f"Failed to create shortcut: {result.stderr}"}
         elif action == "schedule_task":
-            subprocess.Popen(["taskschd.msc"], shell=False)
+            subprocess.Popen(["taskschd.msc"], shell=True)
             return {"success": True, "message": "Task Scheduler opened"}
         elif action == "run_as_admin":
             if not target:
                 return {"success": False, "message": "Application not specified"}
             # Run as administrator using PowerShell
             command = f"Start-Process '{target}' -Verb RunAs"
-            result = subprocess.run(["powershell.exe", "-Command", command], capture_output=True, text=True, shell=False)
+            result = subprocess.run(["powershell.exe", "-Command", command], capture_output=True, text=True, shell=True)
             return {"success": True, "message": f"Attempting to run {target} as administrator"}
         else:
             return {"success": False, "message": "Unknown automation action"}
@@ -2455,25 +2466,25 @@ def handle_productivity(params):
         if action == "pomodoro_start":
             # Start 25-minute timer using PowerShell
             command = f"Start-Sleep -Seconds 1500; [System.Media.SystemSounds]::Beep.Play()"
-            subprocess.Popen(["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", command], shell=False)
+            subprocess.Popen(["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", command], shell=True)
             return {"success": True, "message": "25-minute Pomodoro timer started. You'll hear a beep when done."}
         
         elif action == "focus_mode":
             # Enable focus mode - turn on Do Not Disturb
-            subprocess.Popen(["powershell.exe", "-Command", "Set-Content -Path '$env:TEMP\\focus_mode.txt' -Value 'active'"], shell=False)
+            subprocess.Popen(["powershell.exe", "-Command", "Set-Content -Path '$env:TEMP\\focus_mode.txt' -Value 'active'"], shell=True)
             return {"success": True, "message": "Focus mode enabled. Minimize distractions and focus on your work."}
         
         elif action == "break_start":
             # Start 5-minute break timer
             command = f"Start-Sleep -Seconds 300; [System.Media.SystemSounds]::Beep.Play()"
-            subprocess.Popen(["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", command], shell=False)
+            subprocess.Popen(["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", command], shell=True)
             return {"success": True, "message": "5-minute break timer started. You'll hear a beep when done."}
         
         elif action == "timer_start":
             minutes = params.get("minutes", 10)
             seconds = minutes * 60
             command = f"Start-Sleep -Seconds {seconds}; [System.Media.SystemSounds]::Beep.Play()"
-            subprocess.Popen(["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", command], shell=False)
+            subprocess.Popen(["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", command], shell=True)
             return {"success": True, "message": f"Timer started for {minutes} minutes. You'll hear a beep when done."}
         
         elif action == "timer_stop":
@@ -2540,7 +2551,7 @@ def handle_productivity(params):
             
             # For template and planning, open Notepad
             if action in ["daily_plan", "weekly_review"]:
-                subprocess.Popen(["notepad.exe"], shell=False)
+                subprocess.Popen(["notepad.exe"], shell=True)
                 return {"success": True, "message": f"Opened Notepad for {action}"}
         
         else:
