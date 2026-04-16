@@ -1,6 +1,6 @@
 {
+  "buildCommand": "npm run build",
   "outputDirectory": "build",
-  "env": {
-    "REACT_APP_API_URL": "https://voice-assistant-yw1m.onrender.com"
-  }
+  "devCommand": "npm start",
+  "installCommand": "npm install"
 }
