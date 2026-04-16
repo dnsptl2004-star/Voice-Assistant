@@ -17,7 +17,7 @@ import pyautogui
 import keyboard
 import screen_brightness_control as sbc
 from volume_control import set_volume, get_volume
-from voice_search import search_voice
+from voice_search_service import search_voice
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from waitress import serve
@@ -941,6 +941,8 @@ def execute_command():
             result = handle_automation(parameters)
         elif intent == "productivity":
             result = handle_productivity(parameters)
+        elif intent == "voice_search":
+            result = handle_voice_search(parameters)
         else:
             result = {"success": True, "message": "No action needed for this intent", "action": "none"}
     
@@ -1358,6 +1360,14 @@ def parse_command_locally(user_input):
             {"app": app_name, "search_query": query},
             confidence=88,
         )
+
+    voice_search_match = re.search(r"(?:voice search(?: for)?|search with voice api(?: for)?|voice api search(?: for)?|test voice search(?: for)?)\s+(.+)", lowered)
+    if voice_search_match:
+        query = voice_search_match.group(1).strip()
+        return response("voice_search", f"Voice search for {query}", f"Testing voice search for {query}.", {"query": query}, confidence=92)
+
+    if lowered in {"test voice search", "voice search test", "check voice search"}:
+        return response("voice_search", "Test voice search", "Testing the backend voice search connection.", {"query": "test query"}, confidence=92)
 
     search_match = re.search(r"(?:search for|search|google)\s+(.+)", lowered)
     if search_match:
@@ -2512,6 +2522,27 @@ def handle_productivity(params):
     
     except Exception as e:
         return {"success": False, "message": build_physical_access_error(f"execute productivity action {action}", str(e))}
+
+
+def handle_voice_search(params):
+    """Test the configured voice search provider from the backend."""
+    query = (params.get("query") or "test query").strip()
+
+    try:
+        result = search_voice(query)
+        if result.get("error"):
+            message = f"Voice search test failed: {result['error']}"
+            if result.get("hint"):
+                message = f"{message}. {result['hint']}"
+            return {"success": False, "message": message, "data": result}
+
+        return {
+            "success": True,
+            "message": f"Voice search request completed for '{query}'.",
+            "data": result,
+        }
+    except Exception as e:
+        return {"success": False, "message": build_physical_access_error(f"test voice search for {query}", str(e))}
 
 
 @app.route("/api/health", methods=["GET"])
