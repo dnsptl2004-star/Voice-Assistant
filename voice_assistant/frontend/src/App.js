@@ -240,17 +240,15 @@ const App = () => {
       .replace(/\s+/g, ' ');
   }, []);
 
-  const logClientEvent = useCallback(async (level, event, message, details = {}) => {
-    try {
-      await apiClient.current.post('/client-log', {
-        level,
-        event,
-        message,
-        details
-      });
-    } catch (error) {
+  const logClientEvent = useCallback((level, event, message, details = {}) => {
+    apiClient.current.post('/client-log', {
+      level,
+      event,
+      message,
+      details
+    }).catch((error) => {
       console.error('Failed to write client log:', error);
-    }
+    });
   }, []);
 
   const buildHistoryEntry = useCallback((command, response, intent) => ({
@@ -764,7 +762,7 @@ const detectLanguageSwitch = useCallback((command) => {
 
   const executeCommand = useCallback(async (intent, parameters, confirmed = false) => {
     try {
-      await logClientEvent('info', 'execute_command_request', 'Sending execute command request', {
+      logClientEvent('info', 'execute_command_request', 'Sending execute command request', {
         intent,
         parameters,
         confirmed
@@ -779,7 +777,7 @@ const detectLanguageSwitch = useCallback((command) => {
       });
 
       const result = response.data;
-      await logClientEvent(
+      logClientEvent(
         result.success ? 'info' : 'error',
         'execute_command_response',
         result.message || 'Execute command response received',
@@ -804,7 +802,7 @@ const detectLanguageSwitch = useCallback((command) => {
       const errorMsg = backendMessage || (error.code === 'ECONNABORTED'
         ? 'Command timed out while waiting for Windows to respond.'
         : 'Failed to execute the command.');
-      await logClientEvent('error', 'execute_command_error', 'Error executing command', {
+      logClientEvent('error', 'execute_command_error', 'Error executing command', {
         intent,
         parameters,
         confirmed,
@@ -824,7 +822,7 @@ const detectLanguageSwitch = useCallback((command) => {
         appendCommandHistory(originalCommand, result.message, 'open_app');
         setAiResponse(result.message);
         speakText(result.message);
-        await logClientEvent(result.success ? 'info' : 'error', 'managed_open', result.message, {
+        logClientEvent(result.success ? 'info' : 'error', 'managed_open', result.message, {
           text: originalCommand,
           app: 'youtube',
           success: result.success
@@ -837,7 +835,7 @@ const detectLanguageSwitch = useCallback((command) => {
         appendCommandHistory(originalCommand, result.message, 'close_app');
         setAiResponse(result.message);
         speakText(result.message);
-        await logClientEvent(result.success ? 'info' : 'error', 'managed_close', result.message, {
+        logClientEvent(result.success ? 'info' : 'error', 'managed_close', result.message, {
           text: originalCommand,
           app: 'youtube',
           success: result.success
@@ -850,7 +848,7 @@ const detectLanguageSwitch = useCallback((command) => {
         setAiResponse(stopMessage);
         speakText(stopMessage);
         stopAssistant();
-        await logClientEvent('info', 'stop_command', stopMessage, { text: originalCommand });
+        logClientEvent('info', 'stop_command', stopMessage, { text: originalCommand });
         return true;
       }
       default:
@@ -871,7 +869,7 @@ const detectLanguageSwitch = useCallback((command) => {
     abortControllerRef.current = new AbortController();
 
     try {
-      await logClientEvent('info', 'process_command_request', 'Sending process command request', {
+      logClientEvent('info', 'process_command_request', 'Sending process command request', {
         text: text.trim()
       });
 
@@ -884,7 +882,7 @@ const detectLanguageSwitch = useCallback((command) => {
       );
 
       const result = response.data;
-      await logClientEvent('info', 'process_command_response', result.response || 'Process command response received', {
+      logClientEvent('info', 'process_command_response', result.response || 'Process command response received', {
         text,
         result
       });
@@ -912,7 +910,7 @@ const detectLanguageSwitch = useCallback((command) => {
         return;
       }
       console.error('Error processing command:', error);
-      await logClientEvent('error', 'process_command_error', 'Error processing command', {
+      logClientEvent('error', 'process_command_error', 'Error processing command', {
         text,
         error: error.message
       });

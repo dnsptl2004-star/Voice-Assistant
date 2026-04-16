@@ -854,6 +854,67 @@ def build_general_response(user_input):
     return reply("I am running in local mode. I can handle laptop commands, basic conversation, jokes, date, time, and simple math without any online API.")
 
 
+def build_api_conversation_response(user_input):
+    """Use the configured API-backed search/chat provider for normal conversation."""
+    local_response = build_general_response(user_input)
+    local_text = (local_response.get("response") or "").strip()
+
+    # Keep tiny conversational turns instant instead of waiting on the API path.
+    if user_input and "local mode" not in local_text.lower():
+        local_response["source"] = "local-fast"
+        local_response["confidence"] = max(local_response.get("confidence", 78), 88)
+        return local_response
+
+    result = search_voice(user_input)
+
+    if not isinstance(result, dict):
+        return build_general_response(user_input)
+
+    if result.get("error"):
+        fallback = build_general_response(user_input)
+        fallback["response"] = f"{fallback['response']} ({result['error']})"
+        if result.get("hint"):
+            fallback["response"] = f"{fallback['response']} {result['hint']}"
+        return fallback
+
+    search_results = result.get("results") or []
+    if not isinstance(search_results, list) or not search_results:
+        return {
+            "intent": "general_query",
+            "confidence": 82,
+            "action": "Respond to query",
+            "response": result.get("message") or f"I could not find a strong answer for {user_input}.",
+            "requires_confirmation": False,
+            "parameters": {},
+            "data": result,
+            "source": "api",
+        }
+
+    snippets = []
+    for item in search_results[:2]:
+        title = (item.get("title") or "").strip()
+        snippet = (item.get("snippet") or "").strip()
+        if title and snippet:
+            snippets.append(f"{title}: {snippet}")
+        elif snippet:
+            snippets.append(snippet)
+        elif title:
+            snippets.append(title)
+
+    response_text = " ".join(snippets).strip() or result.get("message") or f"Here is what I found for {user_input}."
+
+    return {
+        "intent": "general_query",
+        "confidence": 90,
+        "action": "Respond to query",
+        "response": response_text,
+        "requires_confirmation": False,
+        "parameters": {},
+        "data": result,
+        "source": "api",
+    }
+
+
 def log_event(event_name, **details):
     """Write structured events to the backend log file."""
     safe_details = {key: str(value) for key, value in details.items()}
@@ -863,7 +924,7 @@ def log_event(event_name, **details):
 
 @app.route("/api/process-command", methods=["POST"])
 def process_command():
-    """Process voice command locally without cloud APIs."""
+    """Process spoken input by keeping commands local and routing conversation to the API."""
     data = request.json or {}
 
     user_input = (data.get("text") or "").strip()
@@ -871,8 +932,8 @@ def process_command():
         return jsonify({"error": "No input provided"}), 400
 
     result = parse_command_locally(user_input)
-    if result["intent"] == "general_query":
-        result = build_general_response(user_input)
+    if result["intent"] in {"general_query", "unknown"}:
+        result = build_api_conversation_response(user_input)
     log_event(
         "process_command",
         user_input=user_input,
@@ -1269,20 +1330,6 @@ def parse_command_locally(user_input):
 
     if not lowered:
         return response("unknown", "No input", "Please say a command.", confidence=0)
-
-    knowledge_query_match = re.search(
-        r"^(?:what is|who is|what are|who are|how does|how do|tell me about|explain)\s+(.+)",
-        lowered,
-    )
-    if knowledge_query_match and os.getenv("VOICE_SEARCH_API_URL"):
-        query = knowledge_query_match.group(0).strip()
-        return response(
-            "voice_search",
-            f"Voice search for {query}",
-            f"Searching for {query}.",
-            {"query": query},
-            confidence=90,
-        )
 
     if compact in {"howareyou", "howru"}:
         return response(
