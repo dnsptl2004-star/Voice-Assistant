@@ -868,16 +868,46 @@ def build_api_conversation_response(user_input):
     result = search_voice(user_input)
 
     if not isinstance(result, dict):
-        return build_general_response(user_input)
+        fallback = build_general_response(user_input)
+        fallback["response"] = "Conversation API did not return a valid response. Commands still work locally."
+        fallback["source"] = "api-error"
+        return fallback
 
     if result.get("error"):
         fallback = build_general_response(user_input)
-        fallback["response"] = f"{fallback['response']} ({result['error']})"
-        if result.get("hint"):
-            fallback["response"] = f"{fallback['response']} {result['hint']}"
+        error_text = str(result.get("error") or "").lower()
+        if "rejected the api key" in error_text:
+            fallback["response"] = (
+                "The Vapi API key is invalid or not accepted. "
+                "Update VAPI_API_KEY in backend/.env.local with a valid Vapi private key. "
+                "Commands still work locally."
+            )
+        else:
+            fallback["response"] = (
+                "Conversation API is not working right now, so I could not answer that with the online assistant. "
+                "Commands still work locally."
+            )
+        fallback["source"] = "api-error"
+        fallback["api_error"] = str(result.get("error"))
         return fallback
 
+    answer = str(result.get("answer") or "").strip()
+    if answer:
+        return {
+            "intent": "general_query",
+            "confidence": 92,
+            "action": "Respond to query",
+            "response": answer,
+            "requires_confirmation": False,
+            "parameters": {},
+            "data": result,
+            "source": "api",
+        }
+
+    provider = str(result.get("provider") or "").strip().lower()
     search_results = result.get("results") or []
+    query = (result.get("query") or user_input or "").strip()
+
     if not isinstance(search_results, list) or not search_results:
         return {
             "intent": "general_query",
@@ -890,18 +920,24 @@ def build_api_conversation_response(user_input):
             "source": "api",
         }
 
-    snippets = []
-    for item in search_results[:2]:
-        title = (item.get("title") or "").strip()
-        snippet = (item.get("snippet") or "").strip()
-        if title and snippet:
-            snippets.append(f"{title}: {snippet}")
-        elif snippet:
-            snippets.append(snippet)
-        elif title:
-            snippets.append(title)
+    first_item = search_results[0] if search_results else {}
+    snippet = str(first_item.get("snippet") or "").strip()
+    title = str(first_item.get("title") or "").strip()
 
-    response_text = " ".join(snippets).strip() or result.get("message") or f"Here is what I found for {user_input}."
+    cleaned_snippet = re.sub(r"\s+", " ", snippet).strip(" .")
+    cleaned_title = re.sub(r"\s+", " ", title).strip(" .")
+
+    if cleaned_snippet:
+        response_text = cleaned_snippet
+    elif cleaned_title:
+        response_text = cleaned_title
+    else:
+        response_text = result.get("message") or f"I found information related to {query}."
+
+    if query.lower().startswith("what is ") and cleaned_snippet:
+        topic = query[8:].strip(" ?.")
+        if topic:
+            response_text = f"{topic.capitalize()} is {cleaned_snippet[0].lower() + cleaned_snippet[1:]}" if len(cleaned_snippet) > 1 else f"{topic.capitalize()} is {cleaned_snippet.lower()}"
 
     return {
         "intent": "general_query",

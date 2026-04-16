@@ -176,7 +176,7 @@ const App = () => {
   const analyserRef = useRef(null);
   const microphoneRef = useRef(null);
   const animationFrameRef = useRef(null);
-  const apiClient = useRef(axios.create({ baseURL: API_BASE_URL, timeout: 5000 }));
+  const apiClient = useRef(axios.create({ baseURL: API_BASE_URL, timeout: 15000 }));
   const speakTextRef = useRef(null);
   const handleCommandRef = useRef(null);
 
@@ -194,6 +194,7 @@ const App = () => {
   const lastProcessedCommandRef = useRef('');
   const lastProcessedTimeRef = useRef(0);
   const isProcessingCommandRef = useRef(false);
+  const pendingTranscriptRef = useRef('');
 
   const keepListeningRef = useRef(false);
   const recognitionStartingRef = useRef(false);
@@ -536,7 +537,7 @@ const detectLanguageSwitch = useCallback((command) => {
               }
             }
           }
-        }, 500);
+        }, 150);
       }
     };
 
@@ -946,7 +947,7 @@ const detectLanguageSwitch = useCallback((command) => {
         await processSingleCommand(commands[i]);
         // Small delay between commands
         if (i < commands.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 150));
         }
       }
       return;
@@ -969,8 +970,8 @@ const detectLanguageSwitch = useCallback((command) => {
     const now = Date.now();
     const timeSinceLast = now - lastProcessedTimeRef.current;
 
-    // Skip duplicate commands within 3 seconds
-    if (command === lastProcessedCommandRef.current && timeSinceLast < 3000) {
+    // Skip duplicate commands within a short safety window
+    if (command === lastProcessedCommandRef.current && timeSinceLast < 1500) {
       console.log('[assistant] Skipping duplicate command:', command, `(${timeSinceLast}ms ago)`);
       return;
     }
@@ -1072,6 +1073,7 @@ const detectLanguageSwitch = useCallback((command) => {
       setTranscript(transcriptText);
       setTranscriptConfidence(confidence);
       setInterimTranscript(result.isFinal ? '' : transcriptText);
+      pendingTranscriptRef.current = transcriptText;
       console.log('🗣 Live:', transcriptText, 'Conf:', confidence.toFixed(2), 'Final:', result.isFinal);
 
       // Don't process if assistant is speaking to avoid picking up system voice
@@ -1082,8 +1084,25 @@ const detectLanguageSwitch = useCallback((command) => {
 
       // Only process final results to avoid duplicates
       if (result.isFinal && transcriptText.length > 0) {
+        clearSilenceTimer();
         console.log('Processing final result:', transcriptText);
         handleCommandFast(transcriptText);
+        pendingTranscriptRef.current = '';
+        return;
+      }
+
+      if (!result.isFinal && transcriptText.length >= 2) {
+        clearSilenceTimer();
+        silenceTimerRef.current = setTimeout(() => {
+          const pendingTranscript = normalizeCommandText(pendingTranscriptRef.current);
+          if (!pendingTranscript) return;
+          if (speakingRef.current || isProcessingRef.current || isProcessingCommandRef.current) return;
+
+          console.log('Processing stable interim result:', pendingTranscript);
+          setInterimTranscript('');
+          handleCommandFast(pendingTranscript);
+          pendingTranscriptRef.current = '';
+        }, 225);
       }
     };
 
@@ -1143,7 +1162,7 @@ const detectLanguageSwitch = useCallback((command) => {
     };
 
     return rec;
-  }, [handleCommandFast, logClientEvent, normalizeCommandText, scheduleRecognitionRestart, startAudioVisualization]);
+  }, [clearSilenceTimer, handleCommandFast, logClientEvent, normalizeCommandText, scheduleRecognitionRestart, startAudioVisualization]);
 
   useEffect(() => {
     speakTextRef.current = speakText;
