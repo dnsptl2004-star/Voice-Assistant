@@ -12,13 +12,27 @@ import logging
 import json
 from pathlib import Path
 from datetime import datetime
-import pyautogui
-import keyboard
-import screen_brightness_control as sbc
-from volume_control import set_volume, get_volume
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from waitress import serve
+
+# GUI automation - only import when running locally (with DISPLAY)
+IS_CLOUD = os.environ.get('RENDER') or not os.environ.get('DISPLAY')
+pyautogui = None
+keyboard = None
+sbc = None
+set_volume = None
+get_volume = None
+
+if not IS_CLOUD:
+    try:
+        import pyautogui
+        import keyboard
+        import screen_brightness_control as sbc
+        from volume_control import set_volume, get_volume
+    except ImportError as e:
+        logging.warning(f"GUI automation not available: {e}")
+        IS_CLOUD = True
 
 app = Flask(__name__)
 CORS(app)
@@ -1860,6 +1874,9 @@ def handle_search_web(params):
 
 def handle_type_text(params):
     """Type text using keyboard automation."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Text typing is not available in cloud environment"}
+    
     text = params.get("text", "")
     if not text:
         return {"success": False, "message": "No text provided"}
@@ -1922,6 +1939,9 @@ def handle_delete_file(params, confirmed):
 
 def handle_media_control(params):
     """Control media playback."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Media control is not available in cloud environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -1945,6 +1965,9 @@ def handle_media_control(params):
 
 def handle_volume_control(params):
     """Control system volume."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Volume control is not available in cloud environment"}
+    
     action = params.get("action", "")
     level = params.get("volume_level", None)
     
@@ -1970,6 +1993,9 @@ def handle_volume_control(params):
 
 def handle_brightness_control(params):
     """Control screen brightness."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Brightness control is not available in cloud environment"}
+    
     level = params.get("brightness_level", None)
     action = params.get("action", "")
     
@@ -2028,6 +2054,9 @@ def handle_system_control(params, confirmed):
 
 def handle_screenshot(params):
     """Take a screenshot of the screen."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Screenshot is not available in cloud environment"}
+    
     try:
         import os
         from datetime import datetime
@@ -2053,6 +2082,9 @@ def handle_screenshot(params):
 
 def handle_window_control(params):
     """Control window operations."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Window control is not available in cloud environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2081,6 +2113,9 @@ def handle_window_control(params):
 
 def handle_clipboard(params):
     """Handle clipboard operations."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Clipboard control is not available in cloud environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2101,6 +2136,9 @@ def handle_clipboard(params):
 
 def handle_keyboard(params):
     """Handle keyboard shortcuts."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Keyboard shortcuts are not available in cloud environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2367,6 +2405,9 @@ def handle_network_tool(params):
 
 def handle_automation(params):
     """Handle automation commands."""
+    if IS_CLOUD:
+        return {"success": False, "message": "Automation commands are not available in cloud environment"}
+    
     action = params.get("action", "").lower()
     target = params.get("target", "")
     
