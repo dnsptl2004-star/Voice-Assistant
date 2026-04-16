@@ -3,13 +3,13 @@ services:
   - type: web
     name: voice-assistant-backend
     runtime: python
-    buildCommand: cd voice_assistant/backend && pip install -r requirements.txt
-    startCommand: cd voice_assistant/backend && python app.py
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: python backend/app.py
     envVars:
       - key: GEMINI_API_KEY
         sync: false
       - key: VOICE_SEARCH_API_KEY
-        value: "vp_live_bd43a81270399426822972bbcc4e1849122e93bb40065af7a26ddcc2ae6ba88d"
+        sync: false
       - key: PORT
         value: 5000
     healthCheckPath: /
@@ -18,8 +18,11 @@ services:
   - type: web
     name: voice-assistant-frontend
     runtime: static
-    buildCommand: cd voice_assistant/frontend && npm install && npm run build
-    publishPath: voice_assistant/frontend/build
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/build
     envVars:
       - key: REACT_APP_API_URL
-        value: "https://voice-assistant-yw1m.onrender.com"
+        fromService:
+          type: web
+          name: voice-assistant-backend
+          property: url

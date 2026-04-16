@@ -149,7 +149,7 @@ const App = () => {
   const analyserRef = useRef(null);
   const microphoneRef = useRef(null);
   const animationFrameRef = useRef(null);
-  const apiClient = useRef(axios.create({ baseURL: 'https://voice-assistant-yw1m.onrender.com/api', timeout: 5000 }));
+  const apiClient = useRef(axios.create({ baseURL: '/api', timeout: 5000 }));
   const speakTextRef = useRef(null);
   const handleCommandRef = useRef(null);
 
