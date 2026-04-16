@@ -16,7 +16,30 @@ const MANAGED_WEB_APPS = {
 
 const REUSABLE_WINDOW_KEY = '__assistant_reusable_window__';
 const API_ROOT = (process.env.REACT_APP_API_URL || '').trim().replace(/\/+$/, '');
-const API_BASE_URL = API_ROOT ? `${API_ROOT}/api` : '/api';
+const LOCAL_API_BASE_URL = 'http://localhost:5000/api';
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
+
+const buildApiBaseCandidates = () => {
+  const candidates = [];
+  const hostname =
+    typeof window !== 'undefined' && window.location ? window.location.hostname : '';
+  const isLocalSession = LOCAL_HOSTNAMES.has(hostname);
+
+  if (isLocalSession) {
+    candidates.push(LOCAL_API_BASE_URL);
+  }
+
+  if (API_ROOT) {
+    candidates.push(`${API_ROOT}/api`);
+  }
+
+  candidates.push('/api');
+
+  return [...new Set(candidates)];
+};
+
+const API_BASE_CANDIDATES = buildApiBaseCandidates();
+const API_BASE_URL = API_BASE_CANDIDATES[0];
 
 const App = () => {
   const [isListening, setIsListening] = useState(false);
@@ -702,14 +725,20 @@ const detectLanguageSwitch = useCallback((command) => {
   }, [stopAudioVisualization, stopListeningSession]);
 
   const checkBackendConnection = async () => {
-    try {
-      const response = await apiClient.current.get('/health', { timeout: 5000 });
-      setBackendConnected(response.data.status === 'healthy');
-      setVoiceSearchReady(Boolean(response.data.voice_search_configured));
-    } catch (error) {
-      setBackendConnected(false);
-      setVoiceSearchReady(false);
+    for (const baseURL of API_BASE_CANDIDATES) {
+      try {
+        const response = await axios.get(`${baseURL}/health`, { timeout: 5000 });
+        apiClient.current.defaults.baseURL = baseURL;
+        setBackendConnected(response.data.status === 'healthy');
+        setVoiceSearchReady(Boolean(response.data.voice_search_configured));
+        return;
+      } catch (error) {
+        console.log('[assistant] backend health check failed', { baseURL, error: error.message });
+      }
     }
+
+    setBackendConnected(false);
+    setVoiceSearchReady(false);
   };
 
   const executeCommand = useCallback(async (intent, parameters, confirmed = false) => {
