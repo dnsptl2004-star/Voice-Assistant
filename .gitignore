@@ -61,7 +61,4 @@ results/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
-# Environment files (sensitive)
-.env.local
-.env
+voice_assistant/backend
