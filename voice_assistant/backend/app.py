@@ -775,6 +775,7 @@ def build_general_response(user_input):
     """Provide a quick local conversational response without cloud APIs."""
     text = (user_input or "").strip()
     lowered = sanitize_spoken_text(text)
+    compact = re.sub(r"\s+", "", lowered)
 
     def reply(message):
         return {
@@ -792,7 +793,7 @@ def build_general_response(user_input):
     if lowered in {"hi", "hello", "hey", "hi assistant", "hello assistant"}:
         return reply("Hello. I can chat with you and also control apps, web, media, volume, and brightness.")
 
-    if "how are you" in lowered:
+    if "how are you" in lowered or compact in {"howareyou", "howru"}:
         return reply("I am working well and ready to help. You can ask me questions or give laptop commands.")
 
     if "thank you" in lowered or "thanks" in lowered:
@@ -801,7 +802,7 @@ def build_general_response(user_input):
     if "bye" in lowered or "goodbye" in lowered:
         return reply("Goodbye. Call me again when you need help.")
 
-    if "what can you do" in lowered or "help" == lowered:
+    if "what can you do" in lowered or compact == "whatcanyoudo" or "help" == lowered:
         return reply("I can open apps and websites, search the web, type text, control volume, brightness, media, and answer common questions locally.")
 
     if "what time is it" in lowered or "current time" in lowered:
@@ -1254,6 +1255,7 @@ def parse_command_locally(user_input):
     """Fallback parser for common commands when Gemini is unavailable."""
     text = user_input.strip()
     lowered = sanitize_spoken_text(text)
+    compact = re.sub(r"\s+", "", lowered)
 
     def response(intent, action, reply, params=None, requires_confirmation=False, confidence=85):
         return {
@@ -1267,6 +1269,28 @@ def parse_command_locally(user_input):
 
     if not lowered:
         return response("unknown", "No input", "Please say a command.", confidence=0)
+
+    knowledge_query_match = re.search(
+        r"^(?:what is|who is|what are|who are|how does|how do|tell me about|explain)\s+(.+)",
+        lowered,
+    )
+    if knowledge_query_match and os.getenv("VOICE_SEARCH_API_URL"):
+        query = knowledge_query_match.group(0).strip()
+        return response(
+            "voice_search",
+            f"Voice search for {query}",
+            f"Searching for {query}.",
+            {"query": query},
+            confidence=90,
+        )
+
+    if compact in {"howareyou", "howru"}:
+        return response(
+            "general_query",
+            "Respond to greeting",
+            "I am working well and ready to help. You can ask me questions or give laptop commands.",
+            confidence=90,
+        )
 
     if any(phrase in lowered for phrase in ["shutdown", "shut down"]):
         return response(
