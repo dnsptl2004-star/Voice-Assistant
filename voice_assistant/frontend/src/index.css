@@ -1,35 +1,15 @@
-:root {
-  color-scheme: dark;
-  --bg-1: #07111f;
-  --bg-2: #0d1d33;
-  --bg-3: #132945;
-  --surface-1: rgba(10, 18, 31, 0.82);
-  --surface-2: rgba(16, 29, 47, 0.76);
-  --surface-3: rgba(255, 255, 255, 0.06);
-  --border-soft: rgba(159, 210, 255, 0.16);
-  --border-strong: rgba(147, 197, 253, 0.3);
-  --text-1: #f7fbff;
-  --text-2: rgba(226, 239, 253, 0.78);
-  --text-3: rgba(201, 219, 236, 0.56);
-  --accent: #67e8f9;
-  --accent-strong: #38bdf8;
-  --accent-deep: #0284c7;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #fb7185;
-  --shadow-xl: 0 32px 100px rgba(2, 8, 20, 0.42);
-  --shadow-lg: 0 18px 60px rgba(2, 8, 20, 0.32);
-  --radius-xl: 28px;
-  --radius-lg: 22px;
-  --radius-md: 16px;
-}
-
-*,
-*::before,
-*::after {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+:root {
+  color-scheme: dark;
+  --page-bg: #040911;
+  --text-main: #f4fbff;
+  --text-soft: rgba(223, 236, 247, 0.72);
+  --border-soft: rgba(158, 207, 255, 0.12);
 }
 
 html {
@@ -37,47 +17,46 @@ html {
 }
 
 body {
-  font-family: "Aptos", "Segoe UI Variable Text", "Trebuchet MS", "Gill Sans", sans-serif;
+  font-family: "Segoe UI Variable Display", "Trebuchet MS", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background:
-    radial-gradient(circle at top left, rgba(103, 232, 249, 0.12), transparent 26%),
-    radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 22%),
-    radial-gradient(circle at bottom center, rgba(14, 116, 144, 0.18), transparent 32%),
-    linear-gradient(145deg, var(--bg-1) 0%, var(--bg-2) 46%, var(--bg-3) 100%);
+    radial-gradient(circle at top left, rgba(95, 205, 255, 0.12), transparent 24%),
+    radial-gradient(circle at top right, rgba(48, 93, 255, 0.14), transparent 24%),
+    radial-gradient(circle at bottom center, rgba(18, 184, 134, 0.08), transparent 22%),
+    linear-gradient(145deg, #030814 0%, #07111f 42%, #030813 100%);
   min-height: 100vh;
-  color: var(--text-1);
+  color: var(--text-main);
 }
 
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  pointer-events: none;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 38px 38px;
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.65), transparent 90%);
-  opacity: 0.45;
+  background-size: 60px 60px;
+  mask-image: radial-gradient(circle at center, black 36%, transparent 100%);
+  pointer-events: none;
 }
 
 #root {
   min-height: 100vh;
-  position: relative;
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
 code {
-  font-family: "Consolas", "Cascadia Code", "SFMono-Regular", monospace;
+  font-family: "Cascadia Code", "Consolas", monospace;
 }
 
 ::selection {
-  background: rgba(103, 232, 249, 0.28);
+  background: rgba(116, 211, 255, 0.3);
   color: #ffffff;
 }
 
@@ -87,16 +66,15 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(125, 211, 252, 0.34), rgba(14, 165, 233, 0.62));
+  background: linear-gradient(180deg, rgba(111, 221, 255, 0.48), rgba(59, 130, 246, 0.48));
   border-radius: 999px;
-  border: 2px solid rgba(4, 12, 24, 0.65);
+  border: 2px solid rgba(5, 11, 20, 0.7);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(125, 211, 252, 0.54), rgba(14, 165, 233, 0.8));
+  background: linear-gradient(180deg, rgba(111, 221, 255, 0.7), rgba(59, 130, 246, 0.7));
 }

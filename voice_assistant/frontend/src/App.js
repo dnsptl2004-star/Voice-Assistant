@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import {
   Mic, MicOff, Volume2, VolumeX, Trash2, Command, Activity, Cpu, Wifi,
-  AlertCircle, CheckCircle, RefreshCw, Send, Square, Zap, Globe, Volume1
+  AlertCircle, CheckCircle, RefreshCw, Send, Square, Globe, Camera
 } from 'lucide-react';
 import './App.css';
+import DetectionPanel from './DetectionPanel';
 
 const MANAGED_WEB_APPS = {
   youtube: 'https://youtube.com',
@@ -65,6 +66,7 @@ const App = () => {
   const [currentLang, setCurrentLang] = useState('en-IN');
   const [typedCommand, setTypedCommand] = useState('');
   const [voiceSearchReady, setVoiceSearchReady] = useState(false);
+  const [activeView, setActiveView] = useState('voice'); // 'voice' or 'detection'
 
   const MIN_CONFIDENCE_THRESHOLD = 0.7;
 
@@ -970,8 +972,8 @@ const detectLanguageSwitch = useCallback((command) => {
     const now = Date.now();
     const timeSinceLast = now - lastProcessedTimeRef.current;
 
-    // Skip duplicate commands within a short safety window
-    if (command === lastProcessedCommandRef.current && timeSinceLast < 1500) {
+    // Skip duplicate commands within 3 seconds
+    if (command === lastProcessedCommandRef.current && timeSinceLast < 3000) {
       console.log('[assistant] Skipping duplicate command:', command, `(${timeSinceLast}ms ago)`);
       return;
     }
@@ -1303,6 +1305,22 @@ const detectLanguageSwitch = useCallback((command) => {
           <Command size={32} />
           <h1>Voice Assistant</h1>
         </div>
+        <div className="view-switcher">
+          <button
+            className={`view-btn ${activeView === 'voice' ? 'active' : ''}`}
+            onClick={() => setActiveView('voice')}
+          >
+            <Mic size={18} />
+            Voice
+          </button>
+          <button
+            className={`view-btn ${activeView === 'detection' ? 'active' : ''}`}
+            onClick={() => setActiveView('detection')}
+          >
+            <Camera size={18} />
+            Detection
+          </button>
+        </div>
         <div className="header-controls">
           <div className={`mode-indicator ${backgroundMode ? 'enabled' : 'disabled'}`}>
             <Activity size={16} />
@@ -1341,40 +1359,10 @@ const detectLanguageSwitch = useCallback((command) => {
       </header>
 
       <main className="app-main">
-        <div className="main-interface">
-          <section className="hero-strip">
-            <div className="hero-copy">
-              <span className="eyebrow">Local Voice Assistant</span>
-              <h2>Fast voice control with background-ready listening while this app stays open.</h2>
-              <p>
-                Keep this browser tab open for continuous mic listening. Use the stop button anytime to mute the microphone instantly.
-              </p>
-              <div className={`continuous-banner ${backgroundMode ? 'enabled' : 'disabled'}`}>
-                <Activity size={18} />
-                <span>
-                  {backgroundMode
-                    ? 'Continuous background listening is active. The assistant keeps waiting for the next command.'
-                    : 'Continuous background listening is off. Turn it on to keep the assistant always listening.'}
-                </span>
-              </div>
-            </div>
-            <div className="hero-stats">
-              <div className="stat-card">
-                <Zap size={18} />
-                <span>Fast local parsing</span>
-              </div>
-              <div className="stat-card">
-                <Globe size={18} />
-                <span>App and web commands</span>
-              </div>
-              <div className="stat-card">
-                <Volume1 size={18} />
-                <span>Voice and typed input</span>
-              </div>
-            </div>
-          </section>
-
-          <div className="voice-section">
+        {activeView === 'voice' ? (
+          <div className="voice-content">
+            <div className="main-interface">
+              <div className="voice-section">
             <div className={`mic-container ${isListening ? 'listening' : ''}`}>
               <button
                 type="button"
@@ -1565,7 +1553,11 @@ const detectLanguageSwitch = useCallback((command) => {
               ))
             )}
           </div>
-        </div>
+          </div>
+          </div>
+          ) : (
+            <DetectionPanel />
+          )}
       </main>
 
       {showTranscriptVerification && (
