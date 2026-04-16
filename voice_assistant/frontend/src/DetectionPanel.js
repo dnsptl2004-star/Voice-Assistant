@@ -133,7 +133,7 @@ const DetectionPanel = () => {
       console.error('Detection error:', err);
       setError('Detection service error');
     }
-  }, [isStreaming, detectionMode, API_BASE_URL]);
+  }, [isStreaming, detectionMode]);
 
   useEffect(() => {
     let animationId;
