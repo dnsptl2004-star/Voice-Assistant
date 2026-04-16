@@ -3,8 +3,8 @@ services:
   - type: web
     name: voice-assistant-backend
     runtime: python
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: python backend/app.py
+    buildCommand: cd voice_assistant/backend && pip install -r requirements.txt
+    startCommand: cd voice_assistant/backend && python app.py
     envVars:
       - key: GEMINI_API_KEY
         sync: false
@@ -18,8 +18,8 @@ services:
   - type: web
     name: voice-assistant-frontend
     runtime: static
-    buildCommand: cd frontend && npm install && npm run build
-    publishPath: frontend/build
+    buildCommand: cd voice_assistant/frontend && npm install && npm run build
+    publishPath: voice_assistant/frontend/build
     envVars:
       - key: REACT_APP_API_URL
         fromService:
