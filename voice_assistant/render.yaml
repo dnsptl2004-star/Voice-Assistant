@@ -1,0 +1,26 @@
+services:
+  # Backend Service
+  - type: web
+    name: voice-assistant-backend
+    runtime: python
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && python app.py
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PORT
+        value: 5000
+    healthCheckPath: /
+    
+  # Frontend Service
+  - type: web
+    name: voice-assistant-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: voice-assistant-backend
+          property: url
