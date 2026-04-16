@@ -268,6 +268,27 @@ const App = () => {
     ]);
   }, [buildHistoryEntry]);
 
+  const formatExecutionMessage = useCallback((intent, result) => {
+    const baseMessage =
+      result.message || (result.success ? 'Action completed successfully.' : 'Action failed.');
+
+    if (intent !== 'voice_search') {
+      return baseMessage;
+    }
+
+    const searchResults = result.data?.results;
+    if (!Array.isArray(searchResults) || searchResults.length === 0) {
+      return baseMessage;
+    }
+
+    const summary = searchResults
+      .slice(0, 2)
+      .map((item, index) => `${index + 1}. ${item.title}: ${item.snippet}`)
+      .join('\n');
+
+    return `${baseMessage}\n\n${summary}`;
+  }, []);
+
   const getManagedWindow = useCallback((name) => {
     const existingWindow = appWindowsRef.current[name];
     if (existingWindow && existingWindow.closed) {
@@ -773,8 +794,7 @@ const detectLanguageSwitch = useCallback((command) => {
         });
         speakText(result.message);
       } else {
-        const responseMessage =
-          result.message || (result.success ? 'Action completed successfully.' : 'Action failed.');
+        const responseMessage = formatExecutionMessage(intent, result);
         setAiResponse(responseMessage);
         speakText(responseMessage);
       }
@@ -794,7 +814,7 @@ const detectLanguageSwitch = useCallback((command) => {
       setAiResponse(errorMsg);
       speakText(errorMsg);
     }
-  }, [logClientEvent, speakText]);
+  }, [formatExecutionMessage, logClientEvent, speakText]);
 
   const executeLocalAction = useCallback(async (action, originalCommand) => {
     switch (action) {
