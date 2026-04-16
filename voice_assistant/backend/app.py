@@ -1156,7 +1156,7 @@ def launch_windows_target(target):
 
     if normalized.endswith(":"):
         try:
-            os.startfile(normalized)
+            subprocess.Popen(["cmd", "/c", "start", "", normalized], shell=True)
             return
         except OSError:
             launched, _ = start_process_with_powershell(normalized)
@@ -1180,11 +1180,10 @@ def launch_windows_target(target):
             raise OSError(detail or f"PowerShell could not start {normalized}")
 
     try:
-        os.startfile(normalized)
+        subprocess.Popen([normalized], shell=True)
         if wait_for_process(normalized, attempts=4, delay=0.25):
-            log_event("launch_windows_target_success", target=normalized, mode="startfile-process-running")
+            log_event("launch_windows_target_success", target=normalized, mode="popen-process-running")
             return
-        log_event("launch_windows_target_failure", target=normalized, mode="startfile-no-process")
     except OSError:
         pass
 
@@ -1229,9 +1228,12 @@ def open_url(url, browser_hint=""):
                 return True
 
         try:
-            os.startfile(url)
+            if os.name == 'nt':
+                subprocess.Popen(["cmd", "/c", "start", "", url], shell=True)
+            else:
+                webbrowser.open(url)
             if wait_for_process(browser_target, attempts=4, delay=0.25):
-                log_event("open_url_success", url=url, browser=browser_target or "default", mode="startfile-browser-process-running")
+                log_event("open_url_success", url=url, browser=browser_target or "default", mode="start-browser-process-running")
                 return True
         except OSError:
             pass
@@ -2221,7 +2223,11 @@ def handle_open_folder(params):
         }
         
         if folder in folder_paths:
-            os.startfile(folder_paths[folder])
+            folder_path = folder_paths[folder]
+            if os.name == 'nt':
+                subprocess.Popen(["explorer", folder_path], shell=True)
+            else:
+                subprocess.Popen(["xdg-open", folder_path])
             return {"success": True, "message": f"Opened {folder} folder"}
         else:
             return {"success": False, "message": f"Unknown folder: {folder}"}
@@ -2269,7 +2275,11 @@ def handle_file_system(params):
     try:
         if action == "list_files":
             # Open file explorer in current directory
-            os.startfile(os.getcwd())
+            cwd = os.getcwd()
+            if os.name == 'nt':
+                subprocess.Popen(["explorer", cwd], shell=True)
+            else:
+                subprocess.Popen(["xdg-open", cwd])
             return {"success": True, "message": "File explorer opened in current directory"}
         else:
             return {"success": False, "message": "Unknown file system action"}
