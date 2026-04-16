@@ -2545,6 +2545,36 @@ def handle_voice_search(params):
         return {"success": False, "message": build_physical_access_error(f"test voice search for {query}", str(e))}
 
 
+@app.route("/api/voice-search", methods=["GET"])
+def mock_voice_search():
+    """Local mock voice-search provider used for quick testing."""
+    query = (request.args.get("query") or "").strip()
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
+
+    sample_results = [
+        {
+            "title": f"Top result for {query}",
+            "snippet": f"This is a local mock voice-search response for '{query}'.",
+            "url": f"https://www.google.com/search?q={query.replace(' ', '+')}",
+        },
+        {
+            "title": f"{query.title()} buying guide",
+            "snippet": f"A second mock result to help test voice-search rendering for '{query}'.",
+            "url": f"https://www.youtube.com/results?search_query={query.replace(' ', '+')}",
+        },
+    ]
+
+    return jsonify(
+        {
+            "query": query,
+            "provider": "local-mock",
+            "count": len(sample_results),
+            "results": sample_results,
+        }
+    )
+
+
 @app.route("/api/health", methods=["GET"])
 def health_check():
     """Health check endpoint."""
