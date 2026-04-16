@@ -15,6 +15,8 @@ const MANAGED_WEB_APPS = {
 };
 
 const REUSABLE_WINDOW_KEY = '__assistant_reusable_window__';
+const API_ROOT = (process.env.REACT_APP_API_URL || '').trim().replace(/\/+$/, '');
+const API_BASE_URL = API_ROOT ? `${API_ROOT}/api` : '/api';
 
 const App = () => {
   const [isListening, setIsListening] = useState(false);
@@ -39,8 +41,10 @@ const App = () => {
   const [backgroundMode, setBackgroundMode] = useState(true);
   const [currentLang, setCurrentLang] = useState('en-IN');
   const [typedCommand, setTypedCommand] = useState('');
+  const [voiceSearchReady, setVoiceSearchReady] = useState(false);
 
   const MIN_CONFIDENCE_THRESHOLD = 0.7;
+
   const quickCommands = [
     // Basic Commands
     'open youtube',
@@ -149,7 +153,7 @@ const App = () => {
   const analyserRef = useRef(null);
   const microphoneRef = useRef(null);
   const animationFrameRef = useRef(null);
-  const apiClient = useRef(axios.create({ baseURL: '/api', timeout: 5000 }));
+  const apiClient = useRef(axios.create({ baseURL: API_BASE_URL, timeout: 5000 }));
   const speakTextRef = useRef(null);
   const handleCommandRef = useRef(null);
 
@@ -701,8 +705,10 @@ const detectLanguageSwitch = useCallback((command) => {
     try {
       const response = await apiClient.current.get('/health', { timeout: 5000 });
       setBackendConnected(response.data.status === 'healthy');
+      setVoiceSearchReady(Boolean(response.data.voice_search_configured));
     } catch (error) {
       setBackendConnected(false);
+      setVoiceSearchReady(false);
     }
   };
 
@@ -822,7 +828,9 @@ const detectLanguageSwitch = useCallback((command) => {
 
       const response = await apiClient.current.post(
         '/process-command',
-        { text: text.trim() },
+        {
+          text: text.trim()
+        },
         { signal: abortControllerRef.current.signal }
       );
 
@@ -1339,6 +1347,10 @@ const detectLanguageSwitch = useCallback((command) => {
               <div className="assistant-panel">
                 <h3>Mic Control</h3>
                 <p>{isListening ? 'Microphone is active now. Use Stop Mic anytime for immediate silence.' : 'Microphone is idle. Start it when you want voice capture.'}</p>
+              </div>
+              <div className="assistant-panel">
+                <h3>Voice Search Key</h3>
+                <p>{voiceSearchReady ? 'Configured on the backend.' : 'Missing on the backend. Add VOICE_SEARCH_API_KEY to backend .env or .env.local.'}</p>
               </div>
             </div>
 

@@ -4,6 +4,7 @@ Local-first Flask API for speech command processing and system automation.
 """
 
 import os
+from dotenv import load_dotenv
 import re
 import subprocess
 import time
@@ -16,9 +17,14 @@ import pyautogui
 import keyboard
 import screen_brightness_control as sbc
 from volume_control import set_volume, get_volume
+from voice_search import search_voice
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from waitress import serve
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env.local", override=True)
 
 app = Flask(__name__)
 CORS(app)
@@ -857,12 +863,12 @@ def log_event(event_name, **details):
 @app.route("/api/process-command", methods=["POST"])
 def process_command():
     """Process voice command locally without cloud APIs."""
-    data = request.json
-    user_input = data.get("text", "")
-    
+    data = request.json or {}
+
+    user_input = (data.get("text") or "").strip()
     if not user_input:
         return jsonify({"error": "No input provided"}), 400
-    
+
     result = parse_command_locally(user_input)
     if result["intent"] == "general_query":
         result = build_general_response(user_input)
@@ -2029,7 +2035,6 @@ def handle_system_control(params, confirmed):
 def handle_screenshot(params):
     """Take a screenshot of the screen."""
     try:
-        import os
         from datetime import datetime
         from pathlib import Path
         
@@ -2512,7 +2517,13 @@ def handle_productivity(params):
 @app.route("/api/health", methods=["GET"])
 def health_check():
     """Health check endpoint."""
-    return jsonify({"status": "healthy", "service": "voice-assistant-backend"})
+    return jsonify(
+        {
+            "status": "healthy",
+            "service": "voice-assistant-backend",
+            "voice_search_configured": bool(os.getenv("VOICE_SEARCH_API_KEY")),
+        }
+    )
 
 
 if __name__ == "__main__":
