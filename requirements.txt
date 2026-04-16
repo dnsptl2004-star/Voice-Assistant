@@ -6,5 +6,4 @@ openai-whisper
 torch
 vosk
 SpeechRecognition
-pygame
 ultralytics
