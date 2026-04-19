@@ -13,9 +13,23 @@ import logging
 import json
 from pathlib import Path
 from datetime import datetime
-import pyautogui
-import keyboard
-import screen_brightness_control as sbc
+
+# Desktop automation libraries - only import if display is available
+HAS_DISPLAY = os.environ.get('DISPLAY') is not None or os.name == 'nt'
+pyautogui = None
+keyboard = None
+sbc = None
+
+if HAS_DISPLAY:
+    try:
+        import pyautogui
+        import keyboard
+        import screen_brightness_control as sbc
+    except Exception as e:
+        logger = logging.getLogger("voice_assistant")
+        logger.warning(f"Desktop automation libraries not available: {e}")
+        HAS_DISPLAY = False
+
 from volume_control import set_volume, get_volume
 from voice_search_service import search_voice
 from flask import Flask, request, jsonify
@@ -1892,6 +1906,8 @@ def handle_open_app(params):
                 if not open_url(web_target, get_available_browser()):
                     return {"success": False, "message": build_physical_access_error(f"open {app_name}")}
                 # Wait for page to load then type the search query
+                if not HAS_DISPLAY or pyautogui is None:
+                    return {"success": False, "message": "Desktop automation not available in headless environment"}
                 time.sleep(2)
                 pyautogui.write(search_query)
                 pyautogui.press('enter')
@@ -1953,13 +1969,14 @@ def handle_close_app(params):
         if result.returncode != 0:
             # Check if it's a browser and try Alt+F4 as fallback
             if system_app.lower() in ["chrome", "msedge", "edge", "firefox"]:
-                try:
-                    # Try Alt+F4 to close active window
-                    pyautogui.hotkey('alt', 'f4')
-                    time.sleep(0.5)
-                    return {"success": True, "message": f"Closed {app_name}"}
-                except Exception:
-                    pass
+                if HAS_DISPLAY and pyautogui is not None:
+                    try:
+                        # Try Alt+F4 to close active window
+                        pyautogui.hotkey('alt', 'f4')
+                        time.sleep(0.5)
+                        return {"success": True, "message": f"Closed {app_name}"}
+                    except Exception:
+                        pass
             return {"success": False, "message": f"{app_name} is not running or could not be closed"}
         return {"success": True, "message": f"Closed {app_name}"}
     except Exception as e:
@@ -1983,6 +2000,9 @@ def handle_search_web(params):
 
 def handle_type_text(params):
     """Type text using keyboard automation."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     text = params.get("text", "")
     if not text:
         return {"success": False, "message": "No text provided"}
@@ -2045,6 +2065,9 @@ def handle_delete_file(params, confirmed):
 
 def handle_media_control(params):
     """Control media playback."""
+    if not HAS_DISPLAY or keyboard is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2077,12 +2100,18 @@ def handle_volume_control(params):
                 return {"success": False, "message": build_physical_access_error("set volume")}
             return {"success": True, "message": f"Volume set to {level}%"}
         elif action == "mute":
+            if not HAS_DISPLAY or keyboard is None:
+                return {"success": False, "message": "Desktop automation not available in headless environment"}
             keyboard.press_and_release('volume mute')
             return {"success": True, "message": "Volume muted"}
         elif action == "up":
+            if not HAS_DISPLAY or keyboard is None:
+                return {"success": False, "message": "Desktop automation not available in headless environment"}
             keyboard.press_and_release('volume up')
             return {"success": True, "message": "Volume increased"}
         elif action == "down":
+            if not HAS_DISPLAY or keyboard is None:
+                return {"success": False, "message": "Desktop automation not available in headless environment"}
             keyboard.press_and_release('volume down')
             return {"success": True, "message": "Volume decreased"}
         else:
@@ -2093,6 +2122,9 @@ def handle_volume_control(params):
 
 def handle_brightness_control(params):
     """Control screen brightness."""
+    if not HAS_DISPLAY or sbc is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     level = params.get("brightness_level", None)
     action = params.get("action", "")
     
@@ -2151,6 +2183,9 @@ def handle_system_control(params, confirmed):
 
 def handle_screenshot(params):
     """Take a screenshot of the screen."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     try:
         from datetime import datetime
         from pathlib import Path
@@ -2175,6 +2210,9 @@ def handle_screenshot(params):
 
 def handle_window_control(params):
     """Control window operations."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2203,6 +2241,9 @@ def handle_window_control(params):
 
 def handle_clipboard(params):
     """Handle clipboard operations."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2223,6 +2264,9 @@ def handle_clipboard(params):
 
 def handle_keyboard(params):
     """Handle keyboard shortcuts."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2318,7 +2362,10 @@ def handle_camera(params):
 
 
 def handle_screen_record(params):
-    """Handle screen recording."""
+    """Handle screen recording operations."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2352,6 +2399,9 @@ def handle_file_system(params):
 
 def handle_navigation(params):
     """Handle browser navigation."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
     action = params.get("action", "").lower()
     
     try:
@@ -2425,6 +2475,8 @@ def handle_system_info(params):
             subprocess.Popen(["sysdm.cpl", ",,3"], shell=False)
             return {"success": True, "message": "Advanced system settings opened"}
         elif action == "env_variables":
+            if not HAS_DISPLAY or pyautogui is None:
+                return {"success": False, "message": "Desktop automation not available in headless environment"}
             subprocess.Popen(["sysdm.cpl", ",,3"], shell=False)
             time.sleep(1)
             pyautogui.hotkey('alt', 'e')
