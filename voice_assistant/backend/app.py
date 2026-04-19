@@ -972,6 +972,23 @@ def log_event(event_name, **details):
     logger.info("%s %s", event_name, joined)
 
 
+@app.route("/", methods=["GET"])
+def index():
+    """Root route - returns API information."""
+    return jsonify({
+        "service": "Voice Assistant Backend API",
+        "version": "1.0.0",
+        "status": "running",
+        "endpoints": {
+            "health": "/api/health",
+            "process_command": "/api/process-command (POST)",
+            "execute": "/api/execute (POST)",
+            "voice_search": "/api/voice-search (GET)",
+            "client_log": "/api/client-log (POST)"
+        }
+    })
+
+
 @app.route("/api/process-command", methods=["POST"])
 def process_command():
     """Process spoken input by keeping commands local and routing conversation to the API."""
