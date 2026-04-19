@@ -67,3 +67,4 @@ voice_assistant/backend/.env
 voice_assistant/backend/.env.local
 voice_assistant/backend/logs/
 voice_assistant/backend/__pycache__/
+voice_assistant/backend/users.json
