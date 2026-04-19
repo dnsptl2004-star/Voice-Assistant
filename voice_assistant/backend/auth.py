@@ -44,6 +44,7 @@ def load_users():
                 "password_hash": bcrypt.hashpw("admin123".encode(), bcrypt.gensalt()).decode(),
                 "is_admin": True,
                 "is_premium": True,
+                "is_lifetime": True,
                 "usage_count": 0,
                 "created_at": datetime.now().isoformat()
             }
@@ -81,6 +82,11 @@ def has_premium_access(user_id):
     user = get_user_by_id(user_id)
     return user and user.get('is_premium', False)
 
+# Check if user has lifetime access
+def has_lifetime_access(user_id):
+    user = get_user_by_id(user_id)
+    return user and user.get('is_lifetime', False)
+
 # Increment user usage
 def increment_usage(user_id):
     users_data = load_users()
@@ -99,15 +105,18 @@ def get_user_usage(user_id):
         return 0
     return user.get('usage_count', 0)
 
-# Check usage limits (free tier: 100 commands per day)
+# Check usage limits (no free tier, all users must pay)
 def check_usage_limit(user_id):
     user = get_user_by_id(user_id)
     if not user:
         return False
     
-    # Admin and premium users have unlimited usage
-    if user.get('is_admin', False) or user.get('is_premium', False):
+    # Admin, premium, and lifetime users have unlimited usage
+    if user.get('is_admin', False) or user.get('is_premium', False) or user.get('is_lifetime', False):
         return True
+    
+    # No free tier - all users must have premium access
+    return False
     
     # Free tier: 100 commands per day
     usage_count = user.get('usage_count', 0)
