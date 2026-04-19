@@ -1,8 +1,12 @@
 flask==3.0.0
 flask-cors==4.0.0
-python-dotenv==1.2.2
+flask-jwt-extended
+openai
+stripe
 requests==2.31.0
+bcrypt==2.31.0
 waitress==3.0.0
 stripe==7.9.0
 flask-jwt-extended==4.6.0
 bcrypt==4.1.2
+python-dotenv==1.2.2

@@ -1216,6 +1216,12 @@ def open_file_cross_platform(path):
     import platform
     import subprocess
     
+    # Check if this is a Windows executable name (not a file path)
+    windows_executables = {'notepad', 'calc', 'mspaint', 'cmd', 'powershell', 'explorer', 'wordpad', 'msedge', 'chrome', 'firefox'}
+    if path.lower() in windows_executables and platform.system() != 'Windows':
+        # Cannot open Windows executables on non-Windows systems
+        return False
+    
     if platform.system() == 'Windows':
         try:
             os.startfile(path)
@@ -1316,9 +1322,18 @@ def start_process_with_powershell(file_path, arguments=None):
 
 def launch_windows_target(target):
     """Use a reliable Windows launch path for apps and URIs."""
+    import platform
     normalized = sanitize_spoken_text(target)
     if not normalized:
         raise ValueError("No target provided")
+    
+    # Check if running on Windows for desktop automation
+    if platform.system() != 'Windows':
+        # Known Windows executables that won't work on Linux
+        windows_apps = {'notepad', 'calc', 'mspaint', 'cmd', 'powershell', 'wordpad', 'explorer', 'msedge', 'chrome', 'firefox'}
+        if normalized.lower() in windows_apps or not normalized.startswith(('http://', 'https://')) and '.' not in normalized:
+            raise OSError(f"Cannot open Windows application '{normalized}' on {platform.system()}. Desktop automation requires a Windows desktop environment.")
+    
     log_event("launch_windows_target_begin", target=target, normalized=normalized)
 
     if normalized.startswith(("http://", "https://")):
