@@ -1347,7 +1347,8 @@ const detectLanguageSwitch = useCallback((command) => {
       checkLocalBackendConnection();
     }, 30000);
     return () => clearInterval(interval);
-  }, [checkBackendConnection, checkLocalBackendConnection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkLocalBackendConnection]);
 
   useEffect(() => {
     const rec = startRecognitionEngine();

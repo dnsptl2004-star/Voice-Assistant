@@ -470,3 +470,32 @@
 2026-04-16 19:57:11,217 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'system_control', 'parameters': {'command': 'shutdown'}, 'confirmed': True}"
 2026-04-16 19:57:11,253 INFO execute_command intent='system_control' parameters="{'command': 'shutdown'}" confirmed='True' success='True' message='System will shutdown in 60 seconds'
 2026-04-16 19:57:11,263 INFO client_log level='info' event='execute_command_response' message='System will shutdown in 60 seconds' details="{'intent': 'system_control', 'parameters': {'command': 'shutdown'}, 'confirmed': True, 'result': {'message': 'System will shutdown in 60 seconds', 'success': True}}"
+2026-04-19 12:20:06,806 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-19 12:20:08,528 INFO process_command user_input='open notepad' intent='open_app' response='Opening notepad.' parameters="{'app': 'notepad'}"
+2026-04-19 12:20:26,190 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-19 12:20:26,200 INFO process_command user_input='open notepad' intent='open_app' response='Opening notepad.' parameters="{'app': 'notepad'}"
+2026-04-19 12:20:26,211 INFO client_log level='info' event='process_command_response' message='Opening notepad.' details="{'text': 'open notepad', 'intent': 'open_app'}"
+2026-04-19 12:20:26,213 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False}"
+2026-04-19 12:20:26,260 INFO launch_windows_target_begin target='notepad' normalized='notepad'
+2026-04-19 12:20:27,869 INFO powershell_start_process file_path='C:\\WINDOWS\\system32\\notepad.EXE' arguments='[]' returncode='0' stdout='' stderr=''
+2026-04-19 12:20:27,869 INFO launch_windows_target_success target='notepad' mode='powershell-start'
+2026-04-19 12:20:27,869 INFO execute_command intent='open_app' parameters="{'app': 'notepad'}" confirmed='False' success='True' message='Opened notepad'
+2026-04-19 12:20:27,880 INFO client_log level='info' event='execute_command_response' message='Opened notepad' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False, 'result': {'message': 'Opened notepad', 'success': True}}"
+2026-04-19 12:20:42,294 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'hello there'}"
+2026-04-19 12:20:46,262 INFO process_command user_input='hello there' intent='general_query' response='Hello! How can I assist you today?' parameters='{}'
+2026-04-19 12:20:46,278 INFO client_log level='info' event='process_command_response' message='Hello! How can I assist you today?' details="{'text': 'hello there', 'intent': 'general_query'}"
+2026-04-19 12:20:51,286 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open calculator'}"
+2026-04-19 12:20:51,323 INFO process_command user_input='open calculator' intent='open_app' response='Opening calculator.' parameters="{'app': 'calculator'}"
+2026-04-19 12:20:51,337 INFO client_log level='info' event='process_command_response' message='Opening calculator.' details="{'text': 'open calculator', 'intent': 'open_app'}"
+2026-04-19 12:20:51,338 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'calculator'}, 'confirmed': False}"
+2026-04-19 12:20:52,145 INFO open_url_success url='https://www.calculator.net' browser='msedge' mode='startfile-browser-process-running'
+2026-04-19 12:20:52,146 INFO execute_command intent='open_app' parameters="{'app': 'calculator'}" confirmed='False' success='True' message='Opened calculator'
+2026-04-19 12:20:52,169 INFO client_log level='info' event='execute_command_response' message='Opened calculator' details="{'intent': 'open_app', 'parameters': {'app': 'calculator'}, 'confirmed': False, 'result': {'message': 'Opened calculator', 'success': True}}"
+2026-04-19 12:20:57,130 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open chrome'}"
+2026-04-19 12:20:57,149 INFO process_command user_input='open chrome' intent='open_app' response='Opening chrome.' parameters="{'app': 'chrome'}"
+2026-04-19 12:20:57,155 INFO client_log level='info' event='process_command_response' message='Opening chrome.' details="{'text': 'open chrome', 'intent': 'open_app'}"
+2026-04-19 12:20:57,156 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'chrome'}, 'confirmed': False}"
+2026-04-19 12:20:57,195 INFO launch_windows_target_begin target='chrome' normalized='chrome'
+2026-04-19 12:20:58,080 INFO launch_windows_target_success target='chrome' mode='startfile-process-running'
+2026-04-19 12:20:58,081 INFO execute_command intent='open_app' parameters="{'app': 'chrome'}" confirmed='False' success='True' message='Opened chrome'
+2026-04-19 12:20:58,108 INFO client_log level='info' event='execute_command_response' message='Opened chrome' details="{'intent': 'open_app', 'parameters': {'app': 'chrome'}, 'confirmed': False, 'result': {'message': 'Opened chrome', 'success': True}}"
