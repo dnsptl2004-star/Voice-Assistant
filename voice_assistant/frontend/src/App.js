@@ -952,6 +952,20 @@ const detectLanguageSwitch = useCallback((command) => {
   const processSingleCommand = useCallback(async (text) => {
     if (!text.trim()) return;
 
+    // Check if user is authenticated
+    if (!token) {
+      setShowAuthModal(true);
+      speakText('Please login to use the voice assistant');
+      return;
+    }
+
+    // Check if user has premium/lifetime access
+    if (user && !user.is_premium && !user.is_lifetime && !user.is_admin) {
+      setShowPlansModal(true);
+      speakText('Premium access required. Please upgrade to use the voice assistant');
+      return;
+    }
+
     isProcessingRef.current = true;
     clearSilenceTimer();
     setSystemStatus(prev => ({ ...prev, processing: true }));
@@ -1052,6 +1066,20 @@ const detectLanguageSwitch = useCallback((command) => {
   const handleCommandFast = useCallback(async (rawCommand) => {
     const command = normalizeCommandText(rawCommand);
     if (!command) return;
+
+    // Check if user is authenticated
+    if (!token) {
+      setShowAuthModal(true);
+      speakText('Please login to use the voice assistant');
+      return;
+    }
+
+    // Check if user has premium/lifetime access
+    if (user && !user.is_premium && !user.is_lifetime && !user.is_admin) {
+      setShowPlansModal(true);
+      speakText('Premium access required. Please upgrade to use the voice assistant');
+      return;
+    }
 
     // Prevent concurrent command execution
     if (isProcessingCommandRef.current) {

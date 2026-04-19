@@ -995,32 +995,35 @@ def index():
 
 
 @app.route("/api/process-command", methods=["POST"])
-@auth.jwt_required(optional=True)
+@auth.jwt_required()
 def process_command():
     """Process spoken input by keeping commands local and routing conversation to the API."""
     data = request.json or {}
+
+    user_id = auth.get_jwt_identity()
+    if not user_id:
+        return jsonify({
+            "error": "Authentication required",
+            "message": "Please login to use the voice assistant"
+        }), 401
 
     user_input = (data.get("text") or "").strip()
     if not user_input:
         return jsonify({"error": "No input provided"}), 400
 
-    # Check usage limit for authenticated users
-    user_id = auth.get_jwt_identity()
-    if user_id and not auth.check_usage_limit(user_id):
+    # Check usage limit (premium/lifetime required)
+    if not auth.check_usage_limit(user_id):
         return jsonify({
-            "error": "Usage limit exceeded",
-            "message": "Free tier limit reached. Please upgrade to premium for unlimited access.",
-            "usage_count": auth.get_user_usage(user_id),
-            "limit": 100
-        }), 429
+            "error": "Premium access required",
+            "message": "Please upgrade to premium to use the voice assistant"
+        }), 403
 
     result = parse_command_locally(user_input)
     if result["intent"] in {"general_query", "unknown"}:
         result = build_api_conversation_response(user_input)
     
-    # Increment usage for authenticated users
-    if user_id:
-        auth.increment_usage(user_id)
+    # Increment usage
+    auth.increment_usage(user_id)
     
     log_event(
         "process_command",
@@ -1033,7 +1036,7 @@ def process_command():
 
 
 @app.route("/api/execute", methods=["POST"])
-@auth.jwt_required(optional=True)
+@auth.jwt_required()
 def execute_command():
     """Execute system command based on AI intent."""
     data = request.json
@@ -1041,15 +1044,19 @@ def execute_command():
     parameters = data.get("parameters", {})
     confirmed = data.get("confirmed", False)
     
-    # Check usage limit for authenticated users
     user_id = auth.get_jwt_identity()
-    if user_id and not auth.check_usage_limit(user_id):
+    if not user_id:
         return jsonify({
-            "error": "Usage limit exceeded",
-            "message": "Free tier limit reached. Please upgrade to premium for unlimited access.",
-            "usage_count": auth.get_user_usage(user_id),
-            "limit": 100
-        }), 429
+            "error": "Authentication required",
+            "message": "Please login to use the voice assistant"
+        }), 401
+    
+    # Check usage limit (premium/lifetime required)
+    if not auth.check_usage_limit(user_id):
+        return jsonify({
+            "error": "Premium access required",
+            "message": "Please upgrade to premium to use the voice assistant"
+        }), 403
     
     result = {"success": False, "message": "Unknown command"}
     
