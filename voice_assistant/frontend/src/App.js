@@ -1017,7 +1017,7 @@ const detectLanguageSwitch = useCallback((command) => {
     } finally {
       isProcessingCommandRef.current = false;
     }
-  }, [detectLanguageSwitch, executeLocalAction, handleCommand, normalizeCommandText, normalizeVoiceCommand, token, user, speakText]);
+  }, [detectLanguageSwitch, executeLocalAction, handleCommand, normalizeCommandText, normalizeVoiceCommand, speakText]);
 
   const scheduleRecognitionRestart = useCallback(() => {
     if (!keepListeningRef.current || !backgroundModeRef.current) return;
