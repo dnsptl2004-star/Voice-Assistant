@@ -930,7 +930,7 @@ const detectLanguageSwitch = useCallback((command) => {
       isProcessingRef.current = false;
       setSystemStatus(prev => ({ ...prev, processing: false }));
     }
-  }, [appendCommandHistory, clearSilenceTimer, executeCommand, logClientEvent, speakText, token, user]);
+  }, [appendCommandHistory, clearSilenceTimer, executeCommand, logClientEvent, speakText]);
 
   const handleCommand = useCallback(async (text) => {
     if (!text.trim()) return;
@@ -1017,7 +1017,7 @@ const detectLanguageSwitch = useCallback((command) => {
     } finally {
       isProcessingCommandRef.current = false;
     }
-  }, [detectLanguageSwitch, executeLocalAction, handleCommand, normalizeCommandText, normalizeVoiceCommand, speakText]);
+  }, [detectLanguageSwitch, executeLocalAction, handleCommand, normalizeCommandText, normalizeVoiceCommand]);
 
   const scheduleRecognitionRestart = useCallback(() => {
     if (!keepListeningRef.current || !backgroundModeRef.current) return;
