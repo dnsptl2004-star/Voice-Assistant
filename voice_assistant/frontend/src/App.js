@@ -18,6 +18,7 @@ const REUSABLE_WINDOW_KEY = '__assistant_reusable_window__';
 const API_ROOT = (process.env.REACT_APP_API_URL || '').trim().replace(/\/+$/, '');
 const LOCAL_API_BASE_URL = 'http://localhost:5000/api';
 const PRODUCTION_API_BASE_URL = 'https://voice-assistant-yw1m.onrender.com/api';
+const NGROK_API_BASE_URL = (process.env.REACT_APP_NGROK_URL || '').trim().replace(/\/+$/, '');
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 
 // Desktop automation intents that require Windows local backend
@@ -75,7 +76,8 @@ const App = () => {
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const apiClient = useRef(axios.create({ baseURL: API_BASE_URL, timeout: 15000 }));
-  const localApiClient = useRef(axios.create({ baseURL: LOCAL_API_BASE_URL, timeout: 15000 }));
+  const localApiUrl = NGROK_API_BASE_URL ? `${NGROK_API_BASE_URL}/api` : LOCAL_API_BASE_URL;
+  const localApiClient = useRef(axios.create({ baseURL: localApiUrl, timeout: 15000 }));
   const [localBackendConnected, setLocalBackendConnected] = useState(false);
   const [aiResponse, setAiResponse] = useState('');
   const [commandHistory, setCommandHistory] = useState([]);
@@ -864,7 +866,7 @@ const detectLanguageSwitch = useCallback((command) => {
     stopAudioVisualization();
   }, [stopAudioVisualization, stopListeningSession]);
 
-  const checkBackendConnection = async () => {
+  const checkBackendConnection = useCallback(async () => {
     for (const baseURL of API_BASE_CANDIDATES) {
       try {
         const response = await axios.get(`${baseURL}/health`, { timeout: 5000 });
@@ -879,16 +881,16 @@ const detectLanguageSwitch = useCallback((command) => {
 
     setBackendConnected(false);
     setVoiceSearchReady(false);
-  };
+  }, []);
 
-  const checkLocalBackendConnection = async () => {
+  const checkLocalBackendConnection = useCallback(async () => {
     try {
-      const response = await axios.get(`${LOCAL_API_BASE_URL}/health`, { timeout: 3000 });
+      const response = await axios.get(`${localApiUrl}/health`, { timeout: 3000 });
       setLocalBackendConnected(response.data.status === 'healthy');
     } catch (error) {
       setLocalBackendConnected(false);
     }
-  };
+  }, [localApiUrl]);
 
   const executeCommand = useCallback(async (intent, parameters, confirmed = false) => {
     try {
@@ -902,7 +904,7 @@ const detectLanguageSwitch = useCallback((command) => {
       const client = isDesktopAutomationIntent(intent) ? localApiClient.current : apiClient.current;
       
       if (isDesktopAutomationIntent(intent) && !localBackendConnected) {
-        const errorMsg = 'Desktop automation requires the backend to run locally on your Windows machine. Please start the backend locally.';
+        const errorMsg = 'Desktop automation requires the backend to run locally on your Windows machine. Please start the backend locally or set up ngrok tunnel.';
         logClientEvent('error', 'execute_command_error', 'Local backend not available', {
           intent,
           parameters,
@@ -1345,7 +1347,7 @@ const detectLanguageSwitch = useCallback((command) => {
       checkLocalBackendConnection();
     }, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [checkBackendConnection, checkLocalBackendConnection]);
 
   useEffect(() => {
     const rec = startRecognitionEngine();
