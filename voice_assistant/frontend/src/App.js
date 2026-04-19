@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import {
   Mic, MicOff, Volume2, VolumeX, Trash2, Command, Activity, Cpu, Wifi,
-  AlertCircle, CheckCircle, RefreshCw, Send, Square, Globe, Camera
+  AlertCircle, CheckCircle, RefreshCw, Send, Square, Globe
 } from 'lucide-react';
 import './App.css';
-import DetectionPanel from './DetectionPanel';
 
 const MANAGED_WEB_APPS = {
   youtube: 'https://youtube.com',
@@ -66,7 +65,6 @@ const App = () => {
   const [currentLang, setCurrentLang] = useState('en-IN');
   const [typedCommand, setTypedCommand] = useState('');
   const [voiceSearchReady, setVoiceSearchReady] = useState(false);
-  const [activeView, setActiveView] = useState('voice'); // 'voice' or 'detection'
 
   const MIN_CONFIDENCE_THRESHOLD = 0.7;
 
@@ -1305,22 +1303,6 @@ const detectLanguageSwitch = useCallback((command) => {
           <Command size={32} />
           <h1>Voice Assistant</h1>
         </div>
-        <div className="view-switcher">
-          <button
-            className={`view-btn ${activeView === 'voice' ? 'active' : ''}`}
-            onClick={() => setActiveView('voice')}
-          >
-            <Mic size={18} />
-            Voice
-          </button>
-          <button
-            className={`view-btn ${activeView === 'detection' ? 'active' : ''}`}
-            onClick={() => setActiveView('detection')}
-          >
-            <Camera size={18} />
-            Detection
-          </button>
-        </div>
         <div className="header-controls">
           <div className={`mode-indicator ${backgroundMode ? 'enabled' : 'disabled'}`}>
             <Activity size={16} />
@@ -1359,10 +1341,8 @@ const detectLanguageSwitch = useCallback((command) => {
       </header>
 
       <main className="app-main">
-        {activeView === 'voice' ? (
-          <div className="voice-content">
-            <div className="main-interface">
-              <div className="voice-section">
+        <div className="main-interface">
+          <div className="voice-section">
             <div className={`mic-container ${isListening ? 'listening' : ''}`}>
               <button
                 type="button"
@@ -1553,11 +1533,7 @@ const detectLanguageSwitch = useCallback((command) => {
               ))
             )}
           </div>
-          </div>
-          </div>
-          ) : (
-            <DetectionPanel />
-          )}
+        </div>
       </main>
 
       {showTranscriptVerification && (
