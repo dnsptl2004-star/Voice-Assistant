@@ -1039,8 +1039,6 @@ def process_command():
 @auth.jwt_required()
 def execute_command():
     """Execute system command based on AI intent."""
-    import platform
-    
     data = request.json
     intent = data.get("intent", "")
     parameters = data.get("parameters", {})
@@ -1060,7 +1058,7 @@ def execute_command():
             "message": "Please upgrade to premium to use the voice assistant"
         }), 403
     
-    # Disable desktop automation on Linux/Render
+    # Disable desktop automation based on environment variable
     desktop_automation_intents = {
         "open_app", "open_and_search", "close_app", "type_text", "media_control",
         "volume_control", "brightness_control", "screenshot", "window_control",
@@ -1068,7 +1066,9 @@ def execute_command():
         "navigation", "automation"
     }
     
-    if intent in desktop_automation_intents and platform.system() != 'Windows':
+    enable_desktop_automation = os.environ.get('ENABLE_DESKTOP_AUTOMATION', 'false').lower() == 'true'
+    
+    if intent in desktop_automation_intents and not enable_desktop_automation:
         return jsonify({
             "success": False,
             "message": "Desktop automation features are only available on Windows. Please use the local development environment for these features.",
