@@ -11,6 +11,8 @@ import time
 import webbrowser
 import logging
 import json
+import bcrypt
+import stripe
 from pathlib import Path
 from datetime import datetime
 
@@ -993,6 +995,7 @@ def index():
 
 
 @app.route("/api/process-command", methods=["POST"])
+@auth.jwt_required(optional=True)
 def process_command():
     """Process spoken input by keeping commands local and routing conversation to the API."""
     data = request.json or {}
@@ -1001,9 +1004,24 @@ def process_command():
     if not user_input:
         return jsonify({"error": "No input provided"}), 400
 
+    # Check usage limit for authenticated users
+    user_id = auth.get_jwt_identity()
+    if user_id and not auth.check_usage_limit(user_id):
+        return jsonify({
+            "error": "Usage limit exceeded",
+            "message": "Free tier limit reached. Please upgrade to premium for unlimited access.",
+            "usage_count": auth.get_user_usage(user_id),
+            "limit": 100
+        }), 429
+
     result = parse_command_locally(user_input)
     if result["intent"] in {"general_query", "unknown"}:
         result = build_api_conversation_response(user_input)
+    
+    # Increment usage for authenticated users
+    if user_id:
+        auth.increment_usage(user_id)
+    
     log_event(
         "process_command",
         user_input=user_input,
@@ -1015,12 +1033,23 @@ def process_command():
 
 
 @app.route("/api/execute", methods=["POST"])
+@auth.jwt_required(optional=True)
 def execute_command():
     """Execute system command based on AI intent."""
     data = request.json
     intent = data.get("intent", "")
     parameters = data.get("parameters", {})
     confirmed = data.get("confirmed", False)
+    
+    # Check usage limit for authenticated users
+    user_id = auth.get_jwt_identity()
+    if user_id and not auth.check_usage_limit(user_id):
+        return jsonify({
+            "error": "Usage limit exceeded",
+            "message": "Free tier limit reached. Please upgrade to premium for unlimited access.",
+            "usage_count": auth.get_user_usage(user_id),
+            "limit": 100
+        }), 429
     
     result = {"success": False, "message": "Unknown command"}
     
@@ -1089,6 +1118,10 @@ def execute_command():
         success=result.get("success", False),
         message=result.get("message", ""),
     )
+    
+    # Increment usage for authenticated users on successful execution
+    if user_id and result.get("success", False):
+        auth.increment_usage(user_id)
     
     return jsonify(result)
 
@@ -2752,6 +2785,189 @@ def mock_voice_search():
             "results": sample_results,
         }
     )
+
+
+# Authentication Routes
+@app.route("/api/auth/register", methods=["POST"])
+def register():
+    """Register a new user."""
+    data = request.json
+    email = data.get("email", "").lower().strip()
+    password = data.get("password", "")
+    
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+    
+    if auth.get_user_by_email(email):
+        return jsonify({"error": "Email already registered"}), 400
+    
+    import uuid
+    user_id = str(uuid.uuid4())
+    password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    
+    users_data = auth.load_users()
+    users_data["users"].append({
+        "id": user_id,
+        "email": email,
+        "password_hash": password_hash,
+        "is_admin": False,
+        "is_premium": False,
+        "usage_count": 0,
+        "created_at": datetime.now().isoformat()
+    })
+    auth.save_users(users_data)
+    
+    return jsonify({
+        "success": True,
+        "message": "User registered successfully",
+        "user_id": user_id
+    })
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def login():
+    """Login user and return JWT tokens."""
+    data = request.json
+    email = data.get("email", "").lower().strip()
+    password = data.get("password", "")
+    
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+    
+    user = auth.get_user_by_email(email)
+    if not user:
+        return jsonify({"error": "Invalid credentials"}), 401
+    
+    if not bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
+        return jsonify({"error": "Invalid credentials"}), 401
+    
+    access_token = auth.create_access_token(identity=user["id"])
+    refresh_token = auth.create_refresh_token(identity=user["id"])
+    
+    return jsonify({
+        "success": True,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "is_admin": user.get("is_admin", False),
+            "is_premium": user.get("is_premium", False),
+            "usage_count": user.get("usage_count", 0)
+        }
+    })
+
+
+@app.route("/api/auth/refresh", methods=["POST"])
+@auth.jwt_required(refresh=True)
+def refresh():
+    """Refresh access token."""
+    user_id = auth.get_jwt_identity()
+    access_token = auth.create_access_token(identity=user_id)
+    return jsonify({"access_token": access_token})
+
+
+@app.route("/api/auth/me", methods=["GET"])
+@auth.jwt_required()
+def get_current_user():
+    """Get current user info."""
+    user_id = auth.get_jwt_identity()
+    user = auth.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    return jsonify({
+        "id": user["id"],
+        "email": user["email"],
+        "is_admin": user.get("is_admin", False),
+        "is_premium": user.get("is_premium", False),
+        "usage_count": user.get("usage_count", 0),
+        "subscription_id": user.get("subscription_id"),
+        "premium_since": user.get("premium_since")
+    })
+
+
+# Payment Routes
+@app.route("/api/payment/plans", methods=["GET"])
+def get_plans():
+    """Get available subscription plans."""
+    return jsonify(payment.get_plans())
+
+
+@app.route("/api/payment/create-checkout", methods=["POST"])
+@auth.jwt_required()
+def create_checkout():
+    """Create Stripe checkout session."""
+    user_id = auth.get_jwt_identity()
+    data = request.json
+    plan_id = data.get("plan_id")
+    
+    if not plan_id:
+        return jsonify({"error": "Plan ID required"}), 400
+    
+    session, error = payment.create_checkout_session(plan_id)
+    if error:
+        return jsonify({"error": error}), 400
+    
+    return jsonify({"url": session.url, "session_id": session.id})
+
+
+@app.route("/api/payment/success", methods=["GET"])
+def payment_success():
+    """Handle successful payment."""
+    session_id = request.args.get("session_id")
+    if not session_id:
+        return jsonify({"error": "Session ID required"}), 400
+    
+    success, result = payment.verify_payment_session(session_id)
+    if not success:
+        return jsonify({"error": result}), 400
+    
+    return jsonify({
+        "success": True,
+        "message": "Payment successful! You now have premium access."
+    })
+
+
+@app.route("/api/payment/cancel", methods=["GET"])
+def payment_cancel():
+    """Handle cancelled payment."""
+    return jsonify({
+        "success": False,
+        "message": "Payment cancelled. You can try again anytime."
+    })
+
+
+@app.route("/api/payment/cancel-subscription", methods=["POST"])
+@auth.jwt_required()
+def cancel_subscription():
+    """Cancel user's subscription."""
+    user_id = auth.get_jwt_identity()
+    success, message = payment.cancel_subscription(user_id)
+    
+    if not success:
+        return jsonify({"error": message}), 400
+    
+    return jsonify({"success": True, "message": message})
+
+
+@app.route("/api/payment/webhook", methods=["POST"])
+def stripe_webhook():
+    """Handle Stripe webhook events."""
+    payload = request.get_data()
+    sig_header = request.headers.get('Stripe-Signature')
+    
+    if not sig_header:
+        return jsonify({"error": "No signature header"}), 400
+    
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    
+    return jsonify(payment.handle_webhook(event))
 
 
 @app.route("/api/health", methods=["GET"])
