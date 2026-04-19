@@ -1223,33 +1223,21 @@ def get_web_target(name):
 
 def is_windows_target_available(target):
     """Check whether a command or executable is available."""
+    import shutil
     normalized = sanitize_spoken_text(target)
     if not normalized:
         return False
-    result = subprocess.run(
-        ["where.exe", normalized],
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
-    return result.returncode == 0
+    return shutil.which(normalized) is not None
 
 
 def resolve_windows_target_path(target):
     """Resolve an executable command to its concrete path when possible."""
+    import shutil
     normalized = sanitize_spoken_text(target)
     if not normalized:
         return ""
-    result = subprocess.run(
-        ["where.exe", normalized],
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
-    if result.returncode != 0:
-        return ""
-    matches = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    return matches[0] if matches else ""
+    path = shutil.which(normalized)
+    return path if path else ""
 
 
 def is_process_running(executable_name):
