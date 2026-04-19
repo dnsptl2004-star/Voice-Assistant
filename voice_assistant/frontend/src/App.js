@@ -892,6 +892,15 @@ const detectLanguageSwitch = useCallback((command) => {
     } catch (error) {
       console.error('Error executing command:', error);
       const backendMessage = error.response?.data?.message;
+      const backendError = error.response?.data?.error;
+      
+      // Check if it's a desktop automation unavailability error
+      if (backendError === 'Desktop automation not available on this platform') {
+        setAiResponse(backendMessage);
+        speakText(backendMessage);
+        return;
+      }
+      
       const errorMsg = backendMessage || (error.code === 'ECONNABORTED'
         ? 'Command timed out while waiting for Windows to respond.'
         : 'Failed to execute the command.');
