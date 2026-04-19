@@ -1137,6 +1137,36 @@ def quote_for_powershell(value):
     return str(value).replace("'", "''")
 
 
+def open_file_cross_platform(path):
+    """Open a file or URL using the appropriate method for the current OS."""
+    import platform
+    import subprocess
+    
+    if platform.system() == 'Windows':
+        try:
+            os.startfile(path)
+            return True
+        except (AttributeError, OSError):
+            # Fallback for Windows if startfile is not available
+            try:
+                subprocess.Popen(['cmd', '/c', 'start', '', path], shell=False)
+                return True
+            except OSError:
+                return False
+    elif platform.system() == 'Darwin':  # macOS
+        try:
+            subprocess.Popen(['open', path], shell=False)
+            return True
+        except OSError:
+            return False
+    else:  # Linux and others
+        try:
+            subprocess.Popen(['xdg-open', path], shell=False)
+            return True
+        except OSError:
+            return False
+
+
 def get_web_target(name):
     """Return a website URL for well-known web destinations."""
     normalized = sanitize_spoken_text(name)
@@ -1225,7 +1255,7 @@ def launch_windows_target(target):
 
     if normalized.endswith(":"):
         try:
-            os.startfile(normalized)
+            open_file_cross_platform(normalized)
             return
         except OSError:
             launched, _ = start_process_with_powershell(normalized)
@@ -1249,7 +1279,7 @@ def launch_windows_target(target):
             raise OSError(detail or f"PowerShell could not start {normalized}")
 
     try:
-        os.startfile(normalized)
+        open_file_cross_platform(normalized)
         if wait_for_process(normalized, attempts=4, delay=0.25):
             log_event("launch_windows_target_success", target=normalized, mode="startfile-process-running")
             return
@@ -1298,7 +1328,7 @@ def open_url(url, browser_hint=""):
                 return True
 
         try:
-            os.startfile(url)
+            open_file_cross_platform(url)
             if wait_for_process(browser_target, attempts=4, delay=0.25):
                 log_event("open_url_success", url=url, browser=browser_target or "default", mode="startfile-browser-process-running")
                 return True
@@ -2282,7 +2312,7 @@ def handle_open_folder(params):
         }
         
         if folder in folder_paths:
-            os.startfile(folder_paths[folder])
+            open_file_cross_platform(folder_paths[folder])
             return {"success": True, "message": f"Opened {folder} folder"}
         else:
             return {"success": False, "message": f"Unknown folder: {folder}"}
@@ -2330,7 +2360,7 @@ def handle_file_system(params):
     try:
         if action == "list_files":
             # Open file explorer in current directory
-            os.startfile(os.getcwd())
+            open_file_cross_platform(os.getcwd())
             return {"success": True, "message": "File explorer opened in current directory"}
         else:
             return {"success": False, "message": "Unknown file system action"}
