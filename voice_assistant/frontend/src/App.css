@@ -888,6 +888,293 @@
   font-size: 1.42rem;
 }
 
+/* Authentication Modal Styles */
+.auth-modal {
+  width: min(92vw, 420px);
+}
+
+.auth-subtitle {
+  margin-bottom: 24px;
+  color: rgba(221, 235, 247, 0.68);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid rgba(160, 207, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(12, 18, 31, 0.6);
+  color: #f7fcff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.auth-input::placeholder {
+  color: rgba(221, 235, 247, 0.42);
+}
+
+.auth-input:focus {
+  border-color: rgba(110, 231, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(110, 231, 255, 0.1);
+}
+
+.auth-switch {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(160, 207, 255, 0.1);
+}
+
+.auth-switch p {
+  color: rgba(221, 235, 247, 0.68);
+  font-size: 0.9rem;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #8ae4ff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-weight: 500;
+}
+
+.link-btn:hover {
+  color: #6ec7ff;
+}
+
+/* Payment Plans Modal Styles */
+.plans-modal {
+  width: min(94vw, 900px);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.usage-info {
+  margin-bottom: 24px;
+  color: #ffd77b;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.plans-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.plan-card {
+  padding: 28px;
+  border-radius: 20px;
+  border: 1px solid rgba(160, 207, 255, 0.15);
+  background: rgba(12, 18, 31, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.plan-card:hover {
+  border-color: rgba(110, 231, 255, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.plan-card.lifetime {
+  border-color: rgba(255, 215, 123, 0.4);
+  background: linear-gradient(180deg, rgba(255, 215, 123, 0.08), rgba(12, 18, 31, 0.8));
+}
+
+.plan-card h4 {
+  color: #f7fcff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.plan-card .price {
+  color: #8ae4ff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.plan-card.lifetime .price {
+  color: #ffd77b;
+  text-shadow: 0 0 20px rgba(255, 215, 123, 0.4);
+}
+
+.plan-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plan-card ul li {
+  color: rgba(221, 235, 247, 0.78);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-card ul li::before {
+  content: '✓';
+  color: #12b886;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.plan-card.lifetime ul li::before {
+  color: #ffd77b;
+}
+
+.plan-btn {
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: auto;
+}
+
+.plan-btn.current {
+  background: rgba(110, 231, 255, 0.15);
+  color: rgba(110, 231, 255, 0.8);
+  cursor: not-allowed;
+}
+
+.plan-btn.upgrade {
+  background: linear-gradient(135deg, rgba(110, 231, 255, 0.2), rgba(58, 123, 255, 0.2));
+  color: #8ae4ff;
+  border: 1px solid rgba(110, 231, 255, 0.3);
+}
+
+.plan-btn.upgrade:hover {
+  background: linear-gradient(135deg, rgba(110, 231, 255, 0.35), rgba(58, 123, 255, 0.35));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(110, 231, 255, 0.3);
+}
+
+.plan-btn.featured {
+  background: linear-gradient(135deg, rgba(255, 215, 123, 0.25), rgba(255, 165, 89, 0.25));
+  color: #ffd77b;
+  border: 1px solid rgba(255, 215, 123, 0.5);
+  box-shadow: 0 8px 24px rgba(255, 215, 123, 0.2);
+}
+
+.plan-btn.featured:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 123, 0.4), rgba(255, 165, 89, 0.4));
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(255, 215, 123, 0.35);
+}
+
+/* User Controls Styles */
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+  color: rgba(221, 235, 247, 0.85);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.admin-badge,
+.lifetime-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-badge {
+  background: rgba(110, 231, 255, 0.15);
+  color: #8ae4ff;
+  border: 1px solid rgba(110, 231, 255, 0.3);
+}
+
+.lifetime-badge {
+  background: rgba(255, 215, 123, 0.15);
+  color: #ffd77b;
+  border: 1px solid rgba(255, 215, 123, 0.3);
+}
+
+.upgrade-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 215, 123, 0.4);
+  background: rgba(255, 215, 123, 0.12);
+  color: #ffd77b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upgrade-btn:hover {
+  background: rgba(255, 215, 123, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 215, 123, 0.2);
+}
+
+.login-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(110, 231, 255, 0.4);
+  background: rgba(110, 231, 255, 0.12);
+  color: #8ae4ff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: rgba(110, 231, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(110, 231, 255, 0.2);
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 99, 99, 0.4);
+  background: rgba(255, 99, 99, 0.12);
+  color: #ff6363;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 99, 99, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 99, 99, 0.2);
+}
+
 .verification-dialog h3 {
   color: #ffd77b;
 }
