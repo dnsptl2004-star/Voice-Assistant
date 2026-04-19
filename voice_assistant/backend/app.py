@@ -3054,4 +3054,5 @@ def health_check():
 if __name__ == "__main__":
     print("Voice Assistant Backend starting...")
     print("Running in local assistant mode")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    serve(app, host="0.0.0.0", port=port)
