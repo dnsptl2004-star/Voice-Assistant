@@ -13,6 +13,7 @@ import logging
 import json
 import bcrypt
 import stripe
+import requests
 from pathlib import Path
 from datetime import datetime
 
@@ -43,6 +44,9 @@ import payment
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 load_dotenv(BASE_DIR / ".env.local", override=True)
+
+# Windows Automation API URL
+WINDOWS_AUTOMATION_API_URL = os.environ.get('WINDOWS_AUTOMATION_API_URL', 'http://localhost:3001')
 
 app = Flask(__name__)
 CORS(app)
@@ -1955,6 +1959,21 @@ def get_synonym_variations(command_word):
     return [command_word]
 
 
+def forward_to_windows_automation(endpoint, data):
+    """Forward command to Windows automation API."""
+    try:
+        response = requests.post(
+            f"{WINDOWS_AUTOMATION_API_URL}{endpoint}",
+            json=data,
+            timeout=10
+        )
+        if response.status_code == 200:
+            return response.json()
+        return {"success": False, "message": f"Windows automation API error: {response.status_code}"}
+    except requests.exceptions.RequestException as e:
+        return {"success": False, "message": f"Failed to connect to Windows automation API: {str(e)}"}
+
+
 def handle_open_app(params):
     """Open an application with fuzzy matching support."""
     app_name = sanitize_spoken_text(params.get("app", ""))
@@ -2017,10 +2036,11 @@ def handle_open_app(params):
             app_launch_history[app_name] = current_time
             return {"success": True, "message": f"Searched for {search_query}"}
         else:
-            # Open application
-            launch_windows_target(system_app)
-            app_launch_history[app_name] = current_time
-            return {"success": True, "message": f"Opened {app_name}"}
+            # Open application via Windows automation API
+            result = forward_to_windows_automation('/api/open-app', {"app": system_app})
+            if result.get("success"):
+                app_launch_history[app_name] = current_time
+            return result
     except Exception as e:
         return {"success": False, "message": build_physical_access_error(f"open {app_name}", str(e))}
 
@@ -2042,27 +2062,12 @@ def handle_close_app(params):
     }
 
     # Try mapped executable first, then use the system app
-    executable = app_executables.get(system_app.lower(), system_app)
-    if not executable.endswith(".exe"):
-        executable = f"{executable}.exe"
-
     try:
-        result = subprocess.run(f"taskkill /f /im {executable}", shell=True, capture_output=True, text=True)
-        if result.returncode != 0:
-            # Check if it's a browser and try Alt+F4 as fallback
-            if system_app.lower() in ["chrome", "msedge", "edge", "firefox"]:
-                if HAS_DISPLAY and pyautogui is not None:
-                    try:
-                        # Try Alt+F4 to close active window
-                        pyautogui.hotkey('alt', 'f4')
-                        time.sleep(0.5)
-                        return {"success": True, "message": f"Closed {app_name}"}
-                    except Exception:
-                        pass
-            return {"success": False, "message": f"{app_name} is not running or could not be closed"}
-        return {"success": True, "message": f"Closed {app_name}"}
+        # Use Windows automation API
+        result = forward_to_windows_automation('/api/close-app', {"app": app_name})
+        return result
     except Exception as e:
-        return {"success": False, "message": f"Could not close {app_name}: {str(e)}"}
+        return {"success": False, "message": build_physical_access_error(f"close {app_name}", str(e))}
 
 
 def handle_search_web(params):
@@ -2147,28 +2152,17 @@ def handle_delete_file(params, confirmed):
 
 def handle_media_control(params):
     """Control media playback."""
-    if not HAS_DISPLAY or keyboard is None:
-        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    action = params.get("action", "")
     
-    action = params.get("action", "").lower()
+    if not action:
+        return {"success": False, "message": "No action specified"}
     
     try:
-        if action in ["play", "pause"]:
-            keyboard.press_and_release('play/pause media')
-            return {"success": True, "message": "Toggled play/pause"}
-        elif action == "next":
-            keyboard.press_and_release('next track')
-            return {"success": True, "message": "Next track"}
-        elif action == "previous":
-            keyboard.press_and_release('previous track')
-            return {"success": True, "message": "Previous track"}
-        elif action == "stop":
-            keyboard.press_and_release('stop media')
-            return {"success": True, "message": "Stopped media"}
-        else:
-            return {"success": False, "message": "Unknown media action"}
+        # Use Windows automation API
+        result = forward_to_windows_automation('/api/media-control', {"action": action})
+        return result
     except Exception as e:
-        return {"success": False, "message": build_physical_access_error("control media", str(e))}
+        return {"success": False, "message": build_physical_access_error(f"control media", str(e))}
 
 
 def handle_volume_control(params):
