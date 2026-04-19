@@ -1,4 +1,4 @@
-# Auto-Start Ngrok + Windows Automation Server
+# Auto-Start Ngrok + Python Backend with Desktop Automation
 
 ## Setup Instructions
 
@@ -20,7 +20,7 @@ To the Startup folder that opened.
 ### Step 3: Test
 
 1. Restart your computer
-2. Both windows-automation server and ngrok should start automatically
+2. Python backend and ngrok should start automatically
 3. Check ngrok window for the new tunnel URL
 4. Update frontend with the new ngrok URL
 
@@ -44,3 +44,4 @@ C:\Users\dnspt\OneDrive\Desktop\AI_ML_PROJECT\start_stable.bat
 - If you manually close ngrok → it stops
 - Free ngrok plan: URL changes every restart (update frontend after each restart)
 - For stable URL, upgrade to ngrok paid plan
+- Python backend runs on port 5000 with desktop automation enabled
