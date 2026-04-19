@@ -17,23 +17,18 @@ C:\Users\dnspt\OneDrive\Desktop\AI_ML_PROJECT\start_stable.bat
 
 To the Startup folder that opened.
 
-### Step 3: Configure Ngrok Stable Domain
-
-Make sure you have reserved the domain on ngrok dashboard:
-- Go to https://dashboard.ngrok.com/domains
-- Reserve: `7475-152-59-39-204.ngrok-free.app`
-
-### Step 4: Test
+### Step 3: Test
 
 1. Restart your computer
 2. Both windows-automation server and ngrok should start automatically
-3. Check if ngrok tunnel is active at https://7475-152-59-39-204.ngrok-free.app
+3. Check ngrok window for the new tunnel URL
+4. Update frontend with the new ngrok URL
 
-### Step 5: Update Frontend
+### Step 4: Update Frontend
 
-Make sure frontend is configured to use:
+After ngrok starts, check the ngrok window for the new URL and update:
 ```
-REACT_APP_API_URL=https://7475-152-59-39-204.ngrok-free.app
+REACT_APP_API_URL=<your-new-ngrok-url>
 ```
 
 ## Manual Start
@@ -47,5 +42,5 @@ C:\Users\dnspt\OneDrive\Desktop\AI_ML_PROJECT\start_stable.bat
 
 - If you shut down PC → service stops
 - If you manually close ngrok → it stops
-- Stable domain ensures URL doesn't change on restart
-- Free ngrok accounts have domain limits
+- Free ngrok plan: URL changes every restart (update frontend after each restart)
+- For stable URL, upgrade to ngrok paid plan
