@@ -61,4 +61,9 @@ results/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-voice_assistant/backend
+
+# Backend sensitive files
+voice_assistant/backend/.env
+voice_assistant/backend/.env.local
+voice_assistant/backend/logs/
+voice_assistant/backend/__pycache__/
