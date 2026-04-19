@@ -1262,8 +1262,10 @@ def launch_windows_target(target):
             if launched:
                 log_event("launch_windows_target_success", target=normalized, mode="uri")
                 return
-            subprocess.Popen(["cmd", "/c", "start", "", normalized], shell=False)
-            log_event("launch_windows_target_success", target=normalized, mode="cmd-uri")
+            import platform
+            if platform.system() == 'Windows':
+                subprocess.Popen(["cmd", "/c", "start", "", normalized], shell=False)
+                log_event("launch_windows_target_success", target=normalized, mode="cmd-uri")
             return
 
     if is_windows_target_available(normalized):
@@ -1295,12 +1297,21 @@ def launch_windows_target(target):
     except OSError:
         pass
 
-    fallback = subprocess.run(
-        ["cmd", "/c", "start", "", normalized],
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
+    import platform
+    if platform.system() == 'Windows':
+        fallback = subprocess.run(
+            ["cmd", "/c", "start", "", normalized],
+            capture_output=True,
+            text=True,
+            shell=False,
+        )
+    else:
+        fallback = subprocess.run(
+            ["xdg-open", normalized],
+            capture_output=True,
+            text=True,
+            shell=False,
+        )
     if fallback.returncode == 0:
         if wait_for_process(normalized, attempts=4, delay=0.25):
             log_event("launch_windows_target_success", target=normalized, mode="cmd-start-process-running")
@@ -1340,10 +1351,11 @@ def open_url(url, browser_hint=""):
             log_event("open_url_success", url=url, browser=browser_target or "default", mode="powershell-url")
             return True
 
-        for command in (
-            ["explorer.exe", url],
-            ["cmd", "/c", "start", "", url],
-        ):
+        import platform
+        commands = [["explorer.exe", url]]
+        if platform.system() == 'Windows':
+            commands.append(["cmd", "/c", "start", "", url])
+        for command in commands:
             try:
                 subprocess.Popen(command, shell=False)
                 if wait_for_process(browser_target, attempts=4, delay=0.25):
