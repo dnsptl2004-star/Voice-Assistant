@@ -991,27 +991,20 @@ const detectLanguageSwitch = useCallback((command) => {
       const result = response.data;
       logClientEvent('info', 'process_command_response', result.response || 'Process command response received', {
         text,
-        result
+        intent: result.intent,
+        success: result.success
       });
 
-      appendCommandHistory(text, result.response, result.intent);
+      setAiResponse(result.response || 'Command processed');
+      setTranscriptConfidence(1.0);
 
-      if (result.requires_confirmation && result.intent !== 'clarification_needed') {
-        setAiResponse(result.response);
-        setConfirmationDialog({
-          message: result.response,
-          intent: result.intent,
-          parameters: result.parameters
-        });
-        speakText(result.response);
+      if (result.intent && result.intent !== 'general_query' && result.intent !== 'unknown') {
+        await executeCommand(result.intent, result.parameters || {}, false);
       } else {
-        if (result.intent !== 'clarification_needed' && result.intent !== 'general_query') {
-          await executeCommand(result.intent, result.parameters, false);
-        } else {
-          setAiResponse(result.response);
-          speakText(result.response);
-        }
+        speakText(result.response || 'Command processed');
       }
+
+      appendCommandHistory(text, result.response || 'Command processed', result.intent || 'general_query');
     } catch (error) {
       if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
         return;
@@ -1021,14 +1014,15 @@ const detectLanguageSwitch = useCallback((command) => {
         text,
         error: error.message
       });
-      const errorMsg = 'Sorry, I encountered an error. Please try again.';
+
+      const errorMsg = error.response?.data?.message || 'Failed to process command';
       setAiResponse(errorMsg);
       speakText(errorMsg);
     } finally {
       isProcessingRef.current = false;
       setSystemStatus(prev => ({ ...prev, processing: false }));
     }
-  }, [appendCommandHistory, clearSilenceTimer, executeCommand, logClientEvent, speakText]);
+  }, [appendCommandHistory, clearSilenceTimer, executeCommand, logClientEvent, speakText, token, user]);
 
   const handleCommand = useCallback(async (text) => {
     if (!text.trim()) return;
@@ -1129,7 +1123,7 @@ const detectLanguageSwitch = useCallback((command) => {
     } finally {
       isProcessingCommandRef.current = false;
     }
-  }, [detectLanguageSwitch, executeLocalAction, handleCommand, normalizeCommandText, normalizeVoiceCommand]);
+  }, [detectLanguageSwitch, executeLocalAction, handleCommand, normalizeCommandText, normalizeVoiceCommand, token, user, speakText]);
 
   const scheduleRecognitionRestart = useCallback(() => {
     if (!keepListeningRef.current || !backgroundModeRef.current) return;
