@@ -35,6 +35,8 @@ from voice_search_service import search_voice
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from waitress import serve
+import auth
+import payment
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
@@ -42,6 +44,7 @@ load_dotenv(BASE_DIR / ".env.local", override=True)
 
 app = Flask(__name__)
 CORS(app)
+jwt = auth.init_jwt(app)
 
 # Deduplication tracking for app launches
 app_launch_history = {}

@@ -17,6 +17,7 @@ const MANAGED_WEB_APPS = {
 const REUSABLE_WINDOW_KEY = '__assistant_reusable_window__';
 const API_ROOT = (process.env.REACT_APP_API_URL || '').trim().replace(/\/+$/, '');
 const LOCAL_API_BASE_URL = 'http://localhost:5000/api';
+const PRODUCTION_API_BASE_URL = 'https://voice-assistant-yw1m.onrender.com/api';
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 
 const buildApiBaseCandidates = () => {
@@ -33,6 +34,8 @@ const buildApiBaseCandidates = () => {
     candidates.push(`${API_ROOT}/api`);
   }
 
+  // Add production backend URL as fallback for Vercel deployment
+  candidates.push(PRODUCTION_API_BASE_URL);
   candidates.push('/api');
 
   return [...new Set(candidates)];
@@ -1437,6 +1440,8 @@ const detectLanguageSwitch = useCallback((command) => {
               <div className="typed-command-row">
                 <input
                   type="text"
+                  id="typed-command-input"
+                  name="typedCommand"
                   value={typedCommand}
                   onChange={(event) => setTypedCommand(event.target.value)}
                   onKeyDown={(event) => {
