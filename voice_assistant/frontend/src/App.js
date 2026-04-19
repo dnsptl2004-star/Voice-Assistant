@@ -20,6 +20,28 @@ const LOCAL_API_BASE_URL = 'http://localhost:5000/api';
 const PRODUCTION_API_BASE_URL = 'https://voice-assistant-yw1m.onrender.com/api';
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
 
+// Desktop automation intents that require Windows local backend
+const DESKTOP_AUTOMATION_INTENTS = new Set([
+  'open_app',
+  'close_app',
+  'type_text',
+  'media_control',
+  'volume_control',
+  'brightness_control',
+  'system_control',
+  'screenshot',
+  'window_control',
+  'clipboard',
+  'keyboard',
+  'open_folder',
+  'camera',
+  'screen_record',
+  'file_system',
+  'navigation',
+  'automation',
+  'productivity'
+]);
+
 const buildApiBaseCandidates = () => {
   const candidates = [];
   const hostname =
@@ -44,10 +66,17 @@ const buildApiBaseCandidates = () => {
 const API_BASE_CANDIDATES = buildApiBaseCandidates();
 const API_BASE_URL = API_BASE_CANDIDATES[0];
 
+const isDesktopAutomationIntent = (intent) => {
+  return DESKTOP_AUTOMATION_INTENTS.has(intent);
+};
+
 const App = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
+  const apiClient = useRef(axios.create({ baseURL: API_BASE_URL, timeout: 15000 }));
+  const localApiClient = useRef(axios.create({ baseURL: LOCAL_API_BASE_URL, timeout: 15000 }));
+  const [localBackendConnected, setLocalBackendConnected] = useState(false);
   const [aiResponse, setAiResponse] = useState('');
   const [commandHistory, setCommandHistory] = useState([]);
   const [systemStatus, setSystemStatus] = useState({
@@ -188,7 +217,6 @@ const App = () => {
   const analyserRef = useRef(null);
   const microphoneRef = useRef(null);
   const animationFrameRef = useRef(null);
-  const apiClient = useRef(axios.create({ baseURL: API_BASE_URL, timeout: 15000 }));
   const speakTextRef = useRef(null);
   const handleCommandRef = useRef(null);
 
@@ -853,6 +881,15 @@ const detectLanguageSwitch = useCallback((command) => {
     setVoiceSearchReady(false);
   };
 
+  const checkLocalBackendConnection = async () => {
+    try {
+      const response = await axios.get(`${LOCAL_API_BASE_URL}/health`, { timeout: 3000 });
+      setLocalBackendConnected(response.data.status === 'healthy');
+    } catch (error) {
+      setLocalBackendConnected(false);
+    }
+  };
+
   const executeCommand = useCallback(async (intent, parameters, confirmed = false) => {
     try {
       logClientEvent('info', 'execute_command_request', 'Sending execute command request', {
@@ -861,7 +898,22 @@ const detectLanguageSwitch = useCallback((command) => {
         confirmed
       });
 
-      const response = await apiClient.current.post('/execute', {
+      // Use local backend for desktop automation, production backend for everything else
+      const client = isDesktopAutomationIntent(intent) ? localApiClient.current : apiClient.current;
+      
+      if (isDesktopAutomationIntent(intent) && !localBackendConnected) {
+        const errorMsg = 'Desktop automation requires the backend to run locally on your Windows machine. Please start the backend locally.';
+        logClientEvent('error', 'execute_command_error', 'Local backend not available', {
+          intent,
+          parameters,
+          error: errorMsg
+        });
+        setAiResponse(errorMsg);
+        speakText(errorMsg);
+        return;
+      }
+
+      const response = await client.post('/execute', {
         intent,
         parameters,
         confirmed
@@ -905,7 +957,7 @@ const detectLanguageSwitch = useCallback((command) => {
       setAiResponse(errorMsg);
       speakText(errorMsg);
     }
-  }, [formatExecutionMessage, logClientEvent, speakText]);
+  }, [formatExecutionMessage, logClientEvent, speakText, localBackendConnected]);
 
   const executeLocalAction = useCallback(async (action, originalCommand) => {
     switch (action) {
@@ -980,6 +1032,8 @@ const detectLanguageSwitch = useCallback((command) => {
         text: text.trim()
       });
 
+      // For process-command, always use production backend (for AI processing)
+      // Desktop automation happens in execute phase
       const response = await apiClient.current.post(
         '/process-command',
         {
@@ -1285,7 +1339,11 @@ const detectLanguageSwitch = useCallback((command) => {
 
   useEffect(() => {
     checkBackendConnection();
-    const interval = setInterval(checkBackendConnection, 30000);
+    checkLocalBackendConnection();
+    const interval = setInterval(() => {
+      checkBackendConnection();
+      checkLocalBackendConnection();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
