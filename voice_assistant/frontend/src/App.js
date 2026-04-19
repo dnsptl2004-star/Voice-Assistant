@@ -69,14 +69,6 @@ const App = () => {
   const [typedCommand, setTypedCommand] = useState('');
   const [voiceSearchReady, setVoiceSearchReady] = useState(false);
   
-  // Authentication state
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showPlansModal, setShowPlansModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
 
   const MIN_CONFIDENCE_THRESHOLD = 0.7;
 
@@ -195,85 +187,6 @@ const App = () => {
   const manualStopRef = useRef(false);
   const silenceTimerRef = useRef(null);
 
-  // Authentication functions
-  const handleLogin = async () => {
-    try {
-      const response = await apiClient.current.post('/auth/login', {
-        email: authEmail,
-        password: authPassword
-      });
-      const { access_token, user: userData } = response.data;
-      localStorage.setItem('token', access_token);
-      setToken(access_token);
-      setUser(userData);
-      setShowAuthModal(false);
-      setAuthEmail('');
-      setAuthPassword('');
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('Login failed. Please check your credentials.');
-    }
-  };
-
-  const handleRegister = async () => {
-    try {
-      await apiClient.current.post('/auth/register', {
-        email: authEmail,
-        password: authPassword
-      });
-      alert('Registration successful! Please login.');
-      setAuthMode('login');
-    } catch (error) {
-      console.error('Registration failed:', error);
-      alert('Registration failed. Please try again.');
-    }
-  };
-
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
-  }, []);
-
-  const fetchCurrentUser = useCallback(async () => {
-    if (!token) return;
-    try {
-      const response = await apiClient.current.get('/auth/me');
-      setUser(response.data);
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      handleLogout();
-    }
-  }, [token, handleLogout]);
-
-  const handleUpgrade = async (planId) => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
-    try {
-      const response = await apiClient.current.post('/payment/create-checkout', { plan_id: planId });
-      window.location.href = response.data.url;
-    } catch (error) {
-      console.error('Failed to create checkout:', error);
-      alert('Failed to start checkout. Please try again.');
-    }
-  };
-
-  // Update axios to include JWT token
-  useEffect(() => {
-    if (token) {
-      apiClient.current.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete apiClient.current.defaults.headers.common['Authorization'];
-    }
-  }, [token]);
-
-  // Fetch current user when token changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    fetchCurrentUser();
-  }, [token, fetchCurrentUser]);
   const isProcessingRef = useRef(false);
   const restartListeningTimeoutRef = useRef(null);
   const backgroundModeRef = useRef(backgroundMode);
@@ -961,20 +874,6 @@ const detectLanguageSwitch = useCallback((command) => {
   const processSingleCommand = useCallback(async (text) => {
     if (!text.trim()) return;
 
-    // Check if user is authenticated
-    if (!token) {
-      setShowAuthModal(true);
-      speakText('Please login to use the voice assistant');
-      return;
-    }
-
-    // Check if user has premium/lifetime access
-    if (user && !user.is_premium && !user.is_lifetime && !user.is_admin) {
-      setShowPlansModal(true);
-      speakText('Premium access required. Please upgrade to use the voice assistant');
-      return;
-    }
-
     isProcessingRef.current = true;
     clearSilenceTimer();
     setSystemStatus(prev => ({ ...prev, processing: true }));
@@ -1069,20 +968,6 @@ const detectLanguageSwitch = useCallback((command) => {
   const handleCommandFast = useCallback(async (rawCommand) => {
     const command = normalizeCommandText(rawCommand);
     if (!command) return;
-
-    // Check if user is authenticated
-    if (!token) {
-      setShowAuthModal(true);
-      speakText('Please login to use the voice assistant');
-      return;
-    }
-
-    // Check if user has premium/lifetime access
-    if (user && !user.is_premium && !user.is_lifetime && !user.is_admin) {
-      setShowPlansModal(true);
-      speakText('Premium access required. Please upgrade to use the voice assistant');
-      return;
-    }
 
     // Prevent concurrent command execution
     if (isProcessingCommandRef.current) {
@@ -1460,28 +1345,6 @@ const detectLanguageSwitch = useCallback((command) => {
             <Wifi size={16} />
             <span>{backendConnected ? 'Connected' : 'Offline'}</span>
           </div>
-          {user ? (
-            <div className="user-controls">
-              <span className="user-info">{user.email}</span>
-              {user.is_admin && <span className="admin-badge">Admin</span>}
-              {user.is_lifetime && <span className="lifetime-badge">Lifetime</span>}
-              {!user.is_premium && !user.is_lifetime && (
-                <button
-                  className="upgrade-btn"
-                  onClick={() => setShowPlansModal(true)}
-                >
-                  Upgrade Required
-                </button>
-              )}
-              <button className="logout-btn" onClick={handleLogout}>
-                Logout
-              </button>
-            </div>
-          ) : (
-            <button className="login-btn" onClick={() => setShowAuthModal(true)}>
-              Login
-            </button>
-          )}
         </div>
       </header>
 
@@ -1750,137 +1613,6 @@ const detectLanguageSwitch = useCallback((command) => {
         </div>
       )}
 
-      {/* Authentication Modal */}
-      {showAuthModal && (
-        <div className="confirmation-overlay">
-          <div className="confirmation-dialog auth-modal">
-            <h3>{authMode === 'login' ? 'Welcome Back' : 'Create Account'}</h3>
-            <p className="auth-subtitle">
-              {authMode === 'login' 
-                ? 'Login to access your voice assistant' 
-                : 'Register to get started with premium access'}
-            </p>
-            <div className="auth-form">
-              <input
-                type="email"
-                placeholder="Email address"
-                value={authEmail}
-                onChange={(e) => setAuthEmail(e.target.value)}
-                className="auth-input"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={authPassword}
-                onChange={(e) => setAuthPassword(e.target.value)}
-                className="auth-input"
-              />
-            </div>
-            <div className="confirmation-buttons">
-              <button
-                className="confirm-btn confirm"
-                onClick={authMode === 'login' ? handleLogin : handleRegister}
-              >
-                {authMode === 'login' ? 'Login' : 'Register'}
-              </button>
-              <button
-                className="confirm-btn cancel"
-                onClick={() => setShowAuthModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-            <div className="auth-switch">
-              {authMode === 'login' ? (
-                <p>
-                  New user?{' '}
-                  <button onClick={() => setAuthMode('register')} className="link-btn">
-                    Create an account
-                  </button>
-                </p>
-              ) : (
-                <p>
-                  Already have an account?{' '}
-                  <button onClick={() => setAuthMode('login')} className="link-btn">
-                    Login instead
-                  </button>
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Subscription Plans Modal */}
-      {showPlansModal && (
-        <div className="confirmation-overlay">
-          <div className="confirmation-dialog plans-modal">
-            <h3>Choose Your Plan</h3>
-            {user && !user.is_premium && (
-              <p className="usage-info">Premium access required to use the voice assistant</p>
-            )}
-            <div className="plans-container">
-              <div className="plan-card premium">
-                <h4>Premium Monthly</h4>
-                <p className="price">$9.99/month</p>
-                <ul>
-                  <li>Unlimited commands</li>
-                  <li>Desktop automation</li>
-                  <li>Priority support</li>
-                  <li>Voice search</li>
-                </ul>
-                <button
-                  className="plan-btn upgrade"
-                  onClick={() => handleUpgrade('premium_monthly')}
-                >
-                  Subscribe
-                </button>
-              </div>
-              <div className="plan-card premium-yearly">
-                <h4>Premium Yearly</h4>
-                <p className="price">$99.99/year</p>
-                <ul>
-                  <li>Unlimited commands</li>
-                  <li>Desktop automation</li>
-                  <li>Priority support</li>
-                  <li>Voice search</li>
-                  <li>Save 17%</li>
-                </ul>
-                <button
-                  className="plan-btn upgrade"
-                  onClick={() => handleUpgrade('premium_yearly')}
-                >
-                  Subscribe
-                </button>
-              </div>
-              <div className="plan-card lifetime">
-                <h4>Lifetime Access</h4>
-                <p className="price">$400 one-time</p>
-                <ul>
-                  <li>Lifetime unlimited access</li>
-                  <li>Desktop automation</li>
-                  <li>Priority support</li>
-                  <li>Voice search</li>
-                  <li>One-time payment</li>
-                  <li>Best value</li>
-                </ul>
-                <button
-                  className="plan-btn upgrade featured"
-                  onClick={() => handleUpgrade('lifetime')}
-                >
-                  Get Lifetime Access
-                </button>
-              </div>
-            </div>
-            <button
-              className="confirm-btn cancel"
-              onClick={() => setShowPlansModal(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       <footer className="app-footer">
         <p>Voice-Controlled Laptop Assistant - Local voice mode</p>
