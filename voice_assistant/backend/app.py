@@ -1216,12 +1216,6 @@ def open_file_cross_platform(path):
     import platform
     import subprocess
     
-    # Check if this is a Windows executable name (not a file path)
-    windows_executables = {'notepad', 'calc', 'mspaint', 'cmd', 'powershell', 'explorer', 'wordpad', 'msedge', 'chrome', 'firefox'}
-    if path.lower() in windows_executables and platform.system() != 'Windows':
-        # Cannot open Windows executables on non-Windows systems
-        return False
-    
     if platform.system() == 'Windows':
         try:
             os.startfile(path)
@@ -1327,13 +1321,6 @@ def launch_windows_target(target):
     if not normalized:
         raise ValueError("No target provided")
     
-    # Check if running on Windows for desktop automation
-    if platform.system() != 'Windows':
-        # Known Windows executables that won't work on Linux
-        windows_apps = {'notepad', 'calc', 'mspaint', 'cmd', 'powershell', 'wordpad', 'explorer', 'msedge', 'chrome', 'firefox'}
-        if normalized.lower() in windows_apps or not normalized.startswith(('http://', 'https://')) and '.' not in normalized:
-            raise OSError(f"Cannot open Windows application '{normalized}' on {platform.system()}. Desktop automation requires a Windows desktop environment.")
-    
     log_event("launch_windows_target_begin", target=target, normalized=normalized)
 
     if normalized.startswith(("http://", "https://")):
@@ -1387,20 +1374,12 @@ def launch_windows_target(target):
         pass
 
     import platform
-    if platform.system() == 'Windows':
-        fallback = subprocess.run(
-            ["cmd", "/c", "start", "", normalized],
-            capture_output=True,
-            text=True,
-            shell=False,
-        )
-    else:
-        fallback = subprocess.run(
-            ["xdg-open", normalized],
-            capture_output=True,
-            text=True,
-            shell=False,
-        )
+    fallback = subprocess.run(
+        ["xdg-open", normalized],
+        capture_output=True,
+        text=True,
+        shell=False,
+    )
     if fallback.returncode == 0:
         if wait_for_process(normalized, attempts=4, delay=0.25):
             log_event("launch_windows_target_success", target=normalized, mode="cmd-start-process-running")
@@ -1441,9 +1420,7 @@ def open_url(url, browser_hint=""):
             return True
 
         import platform
-        commands = [["explorer.exe", url]]
-        if platform.system() == 'Windows':
-            commands.append(["cmd", "/c", "start", "", url])
+        commands = [["xdg-open", url]]
         for command in commands:
             try:
                 subprocess.Popen(command, shell=False)
