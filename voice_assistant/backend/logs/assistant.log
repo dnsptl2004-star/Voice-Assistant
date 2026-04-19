@@ -499,3 +499,70 @@
 2026-04-19 12:20:58,080 INFO launch_windows_target_success target='chrome' mode='startfile-process-running'
 2026-04-19 12:20:58,081 INFO execute_command intent='open_app' parameters="{'app': 'chrome'}" confirmed='False' success='True' message='Opened chrome'
 2026-04-19 12:20:58,108 INFO client_log level='info' event='execute_command_response' message='Opened chrome' details="{'intent': 'open_app', 'parameters': {'app': 'chrome'}, 'confirmed': False, 'result': {'message': 'Opened chrome', 'success': True}}"
+2026-04-19 12:59:12,622 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-19 12:59:12,630 INFO process_command user_input='open notepad' intent='open_app' response='Opening notepad.' parameters="{'app': 'notepad'}"
+2026-04-19 12:59:12,636 INFO client_log level='info' event='process_command_response' message='Opening notepad.' details="{'text': 'open notepad', 'intent': 'open_app'}"
+2026-04-19 12:59:12,638 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False}"
+2026-04-19 12:59:12,703 INFO launch_windows_target_begin target='notepad' normalized='notepad'
+2026-04-19 12:59:15,520 INFO powershell_start_process file_path='C:\\WINDOWS\\system32\\notepad.EXE' arguments='[]' returncode='0' stdout='' stderr=''
+2026-04-19 12:59:15,520 INFO launch_windows_target_success target='notepad' mode='powershell-start'
+2026-04-19 12:59:15,520 INFO execute_command intent='open_app' parameters="{'app': 'notepad'}" confirmed='False' success='True' message='Opened notepad'
+2026-04-19 12:59:15,537 INFO client_log level='info' event='execute_command_response' message='Opened notepad' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False, 'result': {'message': 'Opened notepad', 'success': True}}"
+2026-04-19 13:02:54,476 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-19 13:02:54,513 INFO process_command user_input='open notepad' intent='open_app' response='Opening notepad.' parameters="{'app': 'notepad'}"
+2026-04-19 13:02:54,524 INFO client_log level='info' event='process_command_response' message='Opening notepad.' details="{'text': 'open notepad', 'intent': 'open_app'}"
+2026-04-19 13:02:54,530 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False}"
+2026-04-19 13:02:54,572 INFO launch_windows_target_begin target='notepad' normalized='notepad'
+2026-04-19 13:02:56,297 INFO powershell_start_process file_path='C:\\WINDOWS\\system32\\notepad.EXE' arguments='[]' returncode='0' stdout='' stderr=''
+2026-04-19 13:02:56,297 INFO launch_windows_target_success target='notepad' mode='powershell-start'
+2026-04-19 13:02:56,297 INFO execute_command intent='open_app' parameters="{'app': 'notepad'}" confirmed='False' success='True' message='Opened notepad'
+2026-04-19 13:02:56,322 INFO client_log level='info' event='execute_command_response' message='Opened notepad' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False, 'result': {'message': 'Opened notepad', 'success': True}}"
+2026-04-19 13:06:09,778 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open chrome'}"
+2026-04-19 13:06:09,783 INFO process_command user_input='open chrome' intent='open_app' response='Opening chrome.' parameters="{'app': 'chrome'}"
+2026-04-19 13:06:09,791 INFO client_log level='info' event='process_command_response' message='Opening chrome.' details="{'text': 'open chrome', 'intent': 'open_app'}"
+2026-04-19 13:06:09,792 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'chrome'}, 'confirmed': False}"
+2026-04-19 13:06:09,816 INFO launch_windows_target_begin target='chrome' normalized='chrome'
+2026-04-19 13:06:10,481 INFO launch_windows_target_success target='chrome' mode='startfile-process-running'
+2026-04-19 13:06:10,481 INFO execute_command intent='open_app' parameters="{'app': 'chrome'}" confirmed='False' success='True' message='Opened chrome'
+2026-04-19 13:06:10,500 INFO client_log level='info' event='execute_command_response' message='Opened chrome' details="{'intent': 'open_app', 'parameters': {'app': 'chrome'}, 'confirmed': False, 'result': {'message': 'Opened chrome', 'success': True}}"
+2026-04-19 13:06:17,879 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open chatgpt'}"
+2026-04-19 13:06:17,926 INFO process_command user_input='open chatgpt' intent='open_app' response='Opening chatgpt.' parameters="{'app': 'chatgpt'}"
+2026-04-19 13:06:17,937 INFO client_log level='info' event='process_command_response' message='Opening chatgpt.' details="{'text': 'open chatgpt', 'intent': 'open_app'}"
+2026-04-19 13:06:17,939 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'chatgpt'}, 'confirmed': False}"
+2026-04-19 13:06:19,085 INFO open_url_success url='https://chat.openai.com' browser='msedge' mode='startfile-browser-process-running'
+2026-04-19 13:06:19,085 INFO execute_command intent='open_app' parameters="{'app': 'chatgpt'}" confirmed='False' success='True' message='Opened chatgpt'
+2026-04-19 13:06:19,103 INFO client_log level='info' event='execute_command_response' message='Opened chatgpt' details="{'intent': 'open_app', 'parameters': {'app': 'chatgpt'}, 'confirmed': False, 'result': {'message': 'Opened chatgpt', 'success': True}}"
+2026-04-19 13:06:24,877 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'search for python tutorials'}"
+2026-04-19 13:06:24,928 INFO process_command user_input='search for python tutorials' intent='search_web' response='Searching for python tutorials.' parameters="{'query': 'python tutorials'}"
+2026-04-19 13:06:24,941 INFO client_log level='info' event='process_command_response' message='Searching for python tutorials.' details="{'text': 'search for python tutorials', 'intent': 'search_web'}"
+2026-04-19 13:06:24,944 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'search_web', 'parameters': {'query': 'python tutorials'}, 'confirmed': False}"
+2026-04-19 13:06:26,494 INFO open_url_success url='https://www.google.com/search?q=python+tutorials' browser='msedge' mode='startfile-browser-process-running'
+2026-04-19 13:06:26,494 INFO execute_command intent='search_web' parameters="{'query': 'python tutorials'}" confirmed='False' success='True' message='Searching for python tutorials'
+2026-04-19 13:06:26,672 INFO client_log level='info' event='execute_command_response' message='Searching for python tutorials' details="{'intent': 'search_web', 'parameters': {'query': 'python tutorials'}, 'confirmed': False, 'result': {'message': 'Searching for python tutorials', 'success': True}}"
+2026-04-19 13:09:42,090 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'decrease brightness'}"
+2026-04-19 13:09:42,112 INFO process_command user_input='decrease brightness' intent='brightness_control' response='Decreasing brightness.' parameters="{'action': 'down'}"
+2026-04-19 13:09:42,125 INFO client_log level='info' event='process_command_response' message='Decreasing brightness.' details="{'text': 'decrease brightness', 'intent': 'brightness_control'}"
+2026-04-19 13:09:42,134 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'brightness_control', 'parameters': {'action': 'down'}, 'confirmed': False}"
+2026-04-19 13:09:42,625 INFO execute_command intent='brightness_control' parameters="{'action': 'down'}" confirmed='False' success='True' message='Brightness decreased'
+2026-04-19 13:09:42,640 INFO client_log level='info' event='execute_command_response' message='Brightness decreased' details="{'intent': 'brightness_control', 'parameters': {'action': 'down'}, 'confirmed': False, 'result': {'message': 'Brightness decreased', 'success': True}}"
+2026-04-19 13:09:47,301 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'increase brightness'}"
+2026-04-19 13:09:47,336 INFO process_command user_input='increase brightness' intent='brightness_control' response='Increasing brightness.' parameters="{'action': 'up'}"
+2026-04-19 13:09:47,346 INFO client_log level='info' event='process_command_response' message='Increasing brightness.' details="{'text': 'increase brightness', 'intent': 'brightness_control'}"
+2026-04-19 13:09:47,348 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'brightness_control', 'parameters': {'action': 'up'}, 'confirmed': False}"
+2026-04-19 13:09:47,615 INFO execute_command intent='brightness_control' parameters="{'action': 'up'}" confirmed='False' success='True' message='Brightness increased'
+2026-04-19 13:09:47,632 INFO client_log level='info' event='execute_command_response' message='Brightness increased' details="{'intent': 'brightness_control', 'parameters': {'action': 'up'}, 'confirmed': False, 'result': {'message': 'Brightness increased', 'success': True}}"
+2026-04-19 13:09:58,790 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'show desktop'}"
+2026-04-19 13:09:58,822 INFO process_command user_input='show desktop' intent='window_control' response='Showing desktop.' parameters="{'action': 'show_desktop'}"
+2026-04-19 13:09:58,830 INFO client_log level='info' event='process_command_response' message='Showing desktop.' details="{'text': 'show desktop', 'intent': 'window_control'}"
+2026-04-19 13:09:58,832 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'window_control', 'parameters': {'action': 'show_desktop'}, 'confirmed': False}"
+2026-04-19 13:09:58,972 INFO execute_command intent='window_control' parameters="{'action': 'show_desktop'}" confirmed='False' success='True' message='Desktop shown'
+2026-04-19 13:09:58,998 INFO client_log level='info' event='execute_command_response' message='Desktop shown' details="{'intent': 'window_control', 'parameters': {'action': 'show_desktop'}, 'confirmed': False, 'result': {'message': 'Desktop shown', 'success': True}}"
+2026-04-19 13:14:59,647 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-19 13:14:59,683 INFO process_command user_input='open notepad' intent='open_app' response='Opening notepad.' parameters="{'app': 'notepad'}"
+2026-04-19 13:14:59,706 INFO client_log level='info' event='process_command_response' message='Opening notepad.' details="{'text': 'open notepad', 'intent': 'open_app'}"
+2026-04-19 13:14:59,713 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False}"
+2026-04-19 13:14:59,763 INFO launch_windows_target_begin target='notepad' normalized='notepad'
+2026-04-19 13:15:01,665 INFO powershell_start_process file_path='C:\\WINDOWS\\system32\\notepad.EXE' arguments='[]' returncode='0' stdout='' stderr=''
+2026-04-19 13:15:01,666 INFO launch_windows_target_success target='notepad' mode='powershell-start'
+2026-04-19 13:15:01,666 INFO execute_command intent='open_app' parameters="{'app': 'notepad'}" confirmed='False' success='True' message='Opened notepad'
+2026-04-19 13:15:01,686 INFO client_log level='info' event='execute_command_response' message='Opened notepad' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False, 'result': {'message': 'Opened notepad', 'success': True}}"
