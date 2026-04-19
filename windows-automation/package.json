@@ -1,13 +1,12 @@
 {
   "name": "windows-automation",
   "version": "1.0.0",
-  "description": "Windows Desktop Automation API",
-  "main": "server.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["automation", "windows", "express"],
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
