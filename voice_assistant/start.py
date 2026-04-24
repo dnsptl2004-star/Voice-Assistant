@@ -1,6 +1,8 @@
 """
 Launcher script for Voice-Controlled AI Laptop Assistant.
 Starts both backend and frontend servers.
+
+Created by Dhruv Patel
 """
 
 import subprocess

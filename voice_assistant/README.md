@@ -2,6 +2,8 @@
 
 A professional voice-based AI assistant that understands natural language commands and controls a laptop through speech. Combines speech recognition, AI intent detection (Google Gemini), and system automation for hands-free desktop control.
 
+**Created by Dhruv Patel**
+
 ## Features
 
 - **Voice-to-text input** using Web Speech API

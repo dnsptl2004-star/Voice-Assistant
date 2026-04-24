@@ -1600,13 +1600,13 @@ const detectLanguageSwitch = useCallback((command) => {
                 className="confirm-btn confirm"
                 onClick={() => handleConfirmation(true)}
               >
-                Confirm
+Confirm
               </button>
               <button
                 className="confirm-btn cancel"
                 onClick={() => handleConfirmation(false)}
               >
-                Cancel
+Cancel
               </button>
             </div>
           </div>

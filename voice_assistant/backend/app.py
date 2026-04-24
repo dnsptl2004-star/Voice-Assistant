@@ -1,6 +1,8 @@
 """
 Voice-Controlled AI Laptop Assistant - Backend
 Local-first Flask API for speech command processing and system automation.
+
+Created by Dhruv Patel
 """
 
 import os
@@ -802,45 +804,45 @@ def build_general_response(user_input):
         }
 
     if not lowered:
-        return reply("Please say or type something and I will help.")
+        return reply("कृपया कुछ बोलें या टाइप करें, मैं आपकी मदद करूंगा।")
 
     if lowered in {"hi", "hello", "hey", "hi assistant", "hello assistant"}:
-        return reply("Hello. I can chat with you and also control apps, web, media, volume, and brightness.")
+        return reply("नमस्ते। मैं आपसे बात कर सकता हूं और साथ ही ऐप्स, वेब, मीडिया, वॉल्यूम और ब्राइटनेस को भी नियंत्रित कर सकता हूं।")
 
     if "how are you" in lowered or compact in {"howareyou", "howru"}:
-        return reply("I am working well and ready to help. You can ask me questions or give laptop commands.")
+        return reply("मैं अच्छे से काम कर रहा हूं और मदद के लिए तैयार हूं। आप मुझसे सवाल पूछ सकते हैं या लैपटॉप कमांड दे सकते हैं।")
 
     if "thank you" in lowered or "thanks" in lowered:
-        return reply("You're welcome. I am here to help.")
+        return reply("आपका स्वागत है। मैं मदद के लिए यहां हूं।")
 
     if "bye" in lowered or "goodbye" in lowered:
-        return reply("Goodbye. Call me again when you need help.")
+        return reply("अलविदा। जब आपको मदद चाहिए तो मुझे फिर से बुलाएं।")
 
     if "what can you do" in lowered or compact == "whatcanyoudo" or "help" == lowered:
-        return reply("I can open apps and websites, search the web, type text, control volume, brightness, media, and answer common questions locally.")
+        return reply("मैं ऐप्स और वेबसाइट खोल सकता हूं, वेब पर खोज कर सकता हूं, टेक्स्ट टाइप कर सकता हूं, वॉल्यूम, ब्राइटनेस, मीडिया को नियंत्रित कर सकता हूं, और सामान्य सवालों के जवाब दे सकता हूं।")
 
     if "what time is it" in lowered or "current time" in lowered:
         from datetime import datetime
         current_time = datetime.now().strftime("%I:%M %p")
-        return reply(f"The current time is {current_time}.")
+        return reply(f"वर्तमान समय {current_time} है।")
 
     if "what day is it" in lowered or "what's today" in lowered:
         from datetime import datetime
         current_date = datetime.now().strftime("%A, %B %d, %Y")
-        return reply(f"Today is {current_date}.")
+        return reply(f"आज {current_date} है।")
 
     if "tell me a joke" in lowered or "joke" in lowered:
         jokes = [
-            "Why don't scientists trust atoms? Because they make up everything!",
-            "Why did the scarecrow win an award? Because he was outstanding in his field!",
+            "वैज्ञानिक परमाणुओं पर भरोसा क्यों नहीं करते? क्योंकि वे सब कुछ बनाते हैं!",
+            "काकड़ी ने पुरस्कार क्यों जीता? क्योंकि वह अपने क्षेत्र में उत्कृष्ट था!",
         ]
         import random
         return reply(random.choice(jokes))
 
     if "tell me a fact" in lowered or "random fact" in lowered:
         facts = [
-            "Honey never spoils. Archaeologists have found 3,000-year-old honey in Egyptian tombs that was still edible.",
-            "Octopuses have three hearts and blue blood.",
+            "शहद कभी खराब नहीं होता। पुरातत्वविदों ने मिस्र के कब्रों में 3,000 साल पुराना शहद पाया जो अभी भी खाने योग्य था।",
+            "ऑक्टोपस के तीन दिल और नीला खून होता है।",
         ]
         import random
         return reply(random.choice(facts))
@@ -848,9 +850,9 @@ def build_general_response(user_input):
     # Professional and Business Context Responses (essential only)
     if "productivity tips" in lowered or "work tips" in lowered:
         tips = [
-            "Use the Pomodoro Technique: Work for 25 minutes, then take a 5-minute break.",
-            "Prioritize tasks using the Eisenhower Matrix.",
-            "Time-block your calendar to dedicate specific hours to specific tasks.",
+            "पोमोडोरो तकनीक का उपयोग करें: 25 मिनट काम करें, फिर 5 मिनट का ब्रेक लें।",
+            "आइज़ेनहावर मैट्रिक्स का उपयोग करके कार्यों को प्राथमिकता दें।",
+            "अपने कैलेंडर को टाइम-ब्लॉक करें ताकि विशिष्ट घंटों को विशिष्ट कार्यों के लिए समर्पित किया जा सके।",
         ]
         import random
         return reply(random.choice(tips))
@@ -861,11 +863,11 @@ def build_general_response(user_input):
         try:
             if re.fullmatch(r"[0-9+\-*/(). ]+", expression):
                 result = eval(expression, {"__builtins__": {}}, {})
-                return reply(f"The answer is {result}.")
+                return reply(f"उत्तर {result} है।")
         except Exception:
             pass
 
-    return reply("I am running in local mode. I can handle laptop commands, basic conversation, jokes, date, time, and simple math without any online API.")
+    return reply("मैं स्थानीय मोड में चल रहा हूं। मैं लैपटॉप कमांड, बुनियादी बातचीत, चुटकुले, दिनांक, समय और सरल गणित को बिना किसी ऑनलाइन API के संभाल सकता हूं।")
 
 
 def build_api_conversation_response(user_input):
@@ -883,7 +885,7 @@ def build_api_conversation_response(user_input):
 
     if not isinstance(result, dict):
         fallback = build_general_response(user_input)
-        fallback["response"] = "Conversation API did not return a valid response. Commands still work locally."
+        fallback["response"] = "बातचीत API ने कोई मान्य प्रतिक्रिया नहीं दी। कमांड स्थानीय रूप से काम करते हैं।"
         fallback["source"] = "api-error"
         return fallback
 
@@ -892,14 +894,11 @@ def build_api_conversation_response(user_input):
         error_text = str(result.get("error") or "").lower()
         if "rejected the api key" in error_text:
             fallback["response"] = (
-                "The Vapi API key is invalid or not accepted. "
-                "Update VAPI_API_KEY in backend/.env.local with a valid Vapi private key. "
-                "Commands still work locally."
+                "API कुंजी अस्वीकार कर दी गई। कृपया बैकएंड .env फ़ाइल में एक मान्य API कुंजी कॉन्फ़िगर करें। कमांड स्थानीय रूप से काम करते हैं।"
             )
         else:
             fallback["response"] = (
-                "Conversation API is not working right now, so I could not answer that with the online assistant. "
-                "Commands still work locally."
+                "बातचीत API इस समय काम नहीं कर रही है, इसलिए मैं ऑनलाइन सहायक के साथ उस प्रश्न का उत्तर नहीं दे सका। कमांड स्थानीय रूप से काम करते हैं।"
             )
         fallback["source"] = "api-error"
         fallback["api_error"] = str(result.get("error"))
@@ -927,7 +926,7 @@ def build_api_conversation_response(user_input):
             "intent": "general_query",
             "confidence": 82,
             "action": "Respond to query",
-            "response": result.get("message") or f"I could not find a strong answer for {user_input}.",
+            "response": result.get("message") or f"मैंने {query} से संबंधित जानकारी पाई।",
             "requires_confirmation": False,
             "parameters": {},
             "data": result,
@@ -946,12 +945,12 @@ def build_api_conversation_response(user_input):
     elif cleaned_title:
         response_text = cleaned_title
     else:
-        response_text = result.get("message") or f"I found information related to {query}."
+        response_text = result.get("message") or f"मैंने {query} से संबंधित जानकारी पाई।"
 
     if query.lower().startswith("what is ") and cleaned_snippet:
         topic = query[8:].strip(" ?.")
         if topic:
-            response_text = f"{topic.capitalize()} is {cleaned_snippet[0].lower() + cleaned_snippet[1:]}" if len(cleaned_snippet) > 1 else f"{topic.capitalize()} is {cleaned_snippet.lower()}"
+            response_text = f"{topic.capitalize()} {cleaned_snippet[0].lower() + cleaned_snippet[1:]} है" if len(cleaned_snippet) > 1 else f"{topic.capitalize()} {cleaned_snippet.lower()} है"
 
     return {
         "intent": "general_query",
@@ -1156,11 +1155,11 @@ def sanitize_spoken_text(value):
 def build_physical_access_error(action, detail=""):
     """Build a clearer error for desktop automation failures."""
     message = (
-        f"Could not {action}. Make sure the backend is running in your signed-in Windows desktop session "
-        "and that Windows allows app launches and input automation."
+        f"{action} नहीं किया जा सका। सुनिश्चित करें कि बैकएंड आपके साइन-इन विंडोज डेस्कटॉप सत्र में चल रहा है "
+        "और विंडोज ऐप लॉन्च और इनपुट ऑटोमेशन की अनुमति देता है।"
     )
     if detail:
-        message = f"{message} Details: {detail}"
+        message = f"{message} विवरण: {detail}"
     return message
 
 
