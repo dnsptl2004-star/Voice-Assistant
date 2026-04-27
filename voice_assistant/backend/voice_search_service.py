@@ -80,7 +80,8 @@ def _search_via_vapi(query):
         "You are a concise desktop voice assistant. "
         "Answer general questions directly in 1 to 3 short sentences. "
         "If the user asks to search or asks a knowledge question, provide the answer naturally instead of listing raw search results. "
-        "Do not mention APIs, internal tools, providers, or implementation details."
+        "Do not mention APIs, internal tools, providers, or implementation details. "
+        "Always respond in Hindi language only."
     )
 
     payload = {
@@ -134,6 +135,7 @@ def _build_vaultproof_request(query):
         "You are a concise voice assistant. Answer the user's question directly in 2 to 4 short sentences. "
         "Do not mention APIs, providers, search results, sources, or internal tooling. "
         "If the user is greeting you, respond naturally. "
+        "Always respond in Hindi language only. "
         f"User: {query}"
     )
 
@@ -176,7 +178,7 @@ def _build_vaultproof_request(query):
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are a concise voice assistant. Reply directly and naturally in 2 to 4 short sentences.",
+                    "content": "You are a concise voice assistant. Reply directly and naturally in 2 to 4 short sentences. Always respond in Hindi language only.",
                 },
                 {
                     "role": "user",

@@ -823,7 +823,7 @@ def build_general_response(user_input):
         return reply("मैं सवालों के जवाब दे सकता हूं, रिमाइंडर सेट कर सकता हूं, मौसम अपडेट प्रदान कर सकता हूं, कैलेंडर प्रबंधित कर सकता हूं, संदेश भेज सकता हूं, ऐप्स और वेबसाइट खोल सकता हूं, वेब पर खोज कर सकता हूं, टेक्स्ट टाइप कर सकता हूं, वॉल्यूम, ब्राइटनेस, मीडिया को नियंत्रित कर सकता हूं, और बहुत कुछ। बस मुझसे कुछ भी पूछें! Created by Dhruv Patel")
 
     if "who is your developer" in lowered or "who made you" in lowered or "who created you" in lowered or "who is your creator" in lowered:
-        return reply("My developer is Dhruv Patel. Created by Dhruv Patel")
+        return reply("मेरा डेवलपर ध्रुव पटेल हैं। Created by Dhruv Patel")
 
     if "what time is it" in lowered or "current time" in lowered:
         from datetime import datetime
@@ -1424,13 +1424,13 @@ def parse_command_locally(user_input):
         }
 
     if not lowered:
-        return response("unknown", "No input", "Please say a command.", confidence=0)
+        return response("unknown", "No input", "कृपया एक कमांड बोलें।", confidence=0)
 
     if compact in {"howareyou", "howru"}:
         return response(
             "general_query",
             "Respond to greeting",
-            "I am working well and ready to help. You can ask me questions or give laptop commands.",
+            "मैं अच्छे से काम कर रहा हूं और मदद के लिए तैयार हूं। आप मुझसे सवाल पूछ सकते हैं या लैपटॉप कमांड दे सकते हैं।",
             confidence=90,
         )
 
@@ -1438,7 +1438,7 @@ def parse_command_locally(user_input):
         return response(
             "system_control",
             "Shutdown system",
-            "Are you sure you want to shut down the laptop?",
+            "क्या आप वाकई लैपटॉप बंद करना चाहते हैं?",
             {"command": "shutdown"},
             requires_confirmation=True,
         )
@@ -1446,25 +1446,25 @@ def parse_command_locally(user_input):
         return response(
             "system_control",
             "Restart system",
-            "Are you sure you want to restart the laptop?",
+            "क्या आप वाकई लैपटॉप पुनः आरंभ करना चाहते हैं?",
             {"command": "restart"},
             requires_confirmation=True,
         )
     if "sleep" in lowered:
-        return response("system_control", "Sleep system", "Putting the system to sleep.", {"command": "sleep"})
+        return response("system_control", "Sleep system", "सिस्टम को स्लीप मोड में डाल रहा हूं।", {"command": "sleep"})
     if "lock" in lowered:
-        return response("system_control", "Lock workstation", "Locking the workstation.", {"command": "lock"})
+        return response("system_control", "Lock workstation", "वर्कस्टेशन लॉक कर रहा हूं।", {"command": "lock"})
 
     volume_match = re.search(r"volume(?:\s+(?:to|at))?\s+(\d{1,3})", lowered)
     if volume_match:
         level = max(0, min(int(volume_match.group(1)), 100))
-        return response("volume_control", f"Set volume to {level}%", f"Setting volume to {level} percent.", {"volume_level": level})
+        return response("volume_control", f"Set volume to {level}%", f"वॉल्यूम {level} प्रतिशत सेट कर रहा हूं।", {"volume_level": level})
     if "mute" in lowered:
-        return response("volume_control", "Mute volume", "Muting the volume.", {"action": "mute"})
+        return response("volume_control", "Mute volume", "वॉल्यूम म्यूट कर रहा हूं।", {"action": "mute"})
     if "volume up" in lowered or "increase volume" in lowered or "turn up volume" in lowered:
-        return response("volume_control", "Increase volume", "Increasing the volume.", {"action": "up"})
+        return response("volume_control", "Increase volume", "वॉल्यूम बढ़ा रहा हूं।", {"action": "up"})
     if "volume down" in lowered or "decrease volume" in lowered or "turn down volume" in lowered:
-        return response("volume_control", "Decrease volume", "Decreasing the volume.", {"action": "down"})
+        return response("volume_control", "Decrease volume", "वॉल्यूम कम कर रहा हूं।", {"action": "down"})
 
     brightness_match = re.search(r"brightness(?:\s+(?:to|at))?\s+(\d{1,3})", lowered)
     if brightness_match:
@@ -1472,22 +1472,22 @@ def parse_command_locally(user_input):
         return response(
             "brightness_control",
             f"Set brightness to {level}%",
-            f"Setting brightness to {level} percent.",
+            f"ब्राइटनेस {level} प्रतिशत सेट कर रहा हूं।",
             {"brightness_level": level},
         )
     if "increase brightness" in lowered or "brightness up" in lowered:
-        return response("brightness_control", "Increase brightness", "Increasing brightness.", {"action": "up"})
+        return response("brightness_control", "Increase brightness", "ब्राइटनेस बढ़ा रहा हूं।", {"action": "up"})
     if "decrease brightness" in lowered or "brightness down" in lowered:
-        return response("brightness_control", "Decrease brightness", "Decreasing brightness.", {"action": "down"})
+        return response("brightness_control", "Decrease brightness", "ब्राइटनेस कम कर रहा हूं।", {"action": "down"})
 
     if "play" in lowered:
-        return response("media_control", "Play or pause media", "Toggling media playback.", {"action": "play"})
+        return response("media_control", "Play or pause media", "मीडिया प्लेबैक टॉगल कर रहा हूं।", {"action": "play"})
     if "pause" in lowered:
-        return response("media_control", "Play or pause media", "Pausing the media.", {"action": "pause"})
+        return response("media_control", "Play or pause media", "मीडिया पॉज कर रहा हूं।", {"action": "pause"})
     if "next" in lowered:
-        return response("media_control", "Next track", "Skipping to the next track.", {"action": "next"})
+        return response("media_control", "Next track", "अगला ट्रैक चला रहा हूं।", {"action": "next"})
     if "previous" in lowered or "back track" in lowered:
-        return response("media_control", "Previous track", "Going to the previous track.", {"action": "previous"})
+        return response("media_control", "Previous track", "पिछला ट्रैक चला रहा हूं।", {"action": "previous"})
 
     if lowered.startswith("type ") or lowered.startswith("write "):
         content = text.split(" ", 1)[1].strip() if " " in text else ""
@@ -1514,9 +1514,9 @@ def parse_command_locally(user_input):
                             elif in_code_block or not line.strip().startswith("```"):
                                 code_lines.append(line)
                         generated_code = "\n".join(code_lines).strip()
-                    return response("type_code", "Generate and type code", f"Generating code for {code_request} and typing it.", {"code": generated_code, "open_notepad": True})
+                    return response("type_code", "Generate and type code", f"{code_request} के लिए कोड जनरेट कर रहा हूं और टाइप कर रहा हूं।", {"code": generated_code, "open_notepad": True})
                 else:
-                    return response("type_text", "Type text", f"Typing {content}.", {"text": content})
+                    return response("type_text", "Type text", f"{content} टाइप कर रहा हूं।", {"text": content})
             except Exception as e:
                 return response("type_text", "Type text", f"Typing {content}.", {"text": content})
         
@@ -1525,12 +1525,12 @@ def parse_command_locally(user_input):
     file_match = re.search(r"create file\s+(.+)", lowered)
     if file_match:
         filename = file_match.group(1).strip()
-        return response("create_file", f"Create file {filename}", f"Creating file {filename}.", {"filename": filename})
+        return response("create_file", f"Create file {filename}", f"{filename} फ़ाइल बना रहा हूं।", {"filename": filename})
 
     folder_match = re.search(r"create folder\s+(.+)", lowered)
     if folder_match:
         foldername = folder_match.group(1).strip()
-        return response("create_folder", f"Create folder {foldername}", f"Creating folder {foldername}.", {"foldername": foldername})
+        return response("create_folder", f"Create folder {foldername}", f"{foldername} फ़ोल्डर बना रहा हूं।", {"foldername": foldername})
 
     open_search_match = re.search(r"(?:open|launch|start)\s+(\w+)\s+(?:and\s+)?search\s+(?:for\s+)?(.+)", lowered)
     if open_search_match:
@@ -1539,7 +1539,7 @@ def parse_command_locally(user_input):
         return response(
             "open_and_search",
             f"Open {app_name} and search for {search_query}",
-            f"Opening {app_name} and searching for {search_query}.",
+            f"{app_name} खोल रहा हूं और {search_query} के लिए खोज कर रहा हूं।",
             {"app": app_name, "search_query": search_query},
             confidence=90,
         )
@@ -1551,7 +1551,7 @@ def parse_command_locally(user_input):
         return response(
             "open_and_search",
             f"Open {app_name} and search for {query}",
-            f"Opening {app_name} and searching for {query}.",
+            f"{app_name} खोल रहा हूं और {query} के लिए खोज कर रहा हूं।",
             {"app": app_name, "search_query": query},
             confidence=88,
         )
@@ -1559,382 +1559,382 @@ def parse_command_locally(user_input):
     voice_search_match = re.search(r"(?:voice search(?: for)?|search with voice api(?: for)?|voice api search(?: for)?|test voice search(?: for)?)\s+(.+)", lowered)
     if voice_search_match:
         query = voice_search_match.group(1).strip()
-        return response("voice_search", f"Voice search for {query}", f"Testing voice search for {query}.", {"query": query}, confidence=92)
+        return response("voice_search", f"Voice search for {query}", f"{query} के लिए वॉइस सर्च टेस्ट कर रहा हूं।", {"query": query}, confidence=92)
 
     if lowered in {"test voice search", "voice search test", "check voice search"}:
-        return response("voice_search", "Test voice search", "Testing the backend voice search connection.", {"query": "test query"}, confidence=92)
+        return response("voice_search", "Test voice search", "बैकएंड वॉइस सर्च कनेक्शन टेस्ट कर रहा हूं।", {"query": "test query"}, confidence=92)
 
     search_match = re.search(r"(?:search for|search|google)\s+(.+)", lowered)
     if search_match:
         query = search_match.group(1).strip()
-        return response("search_web", f"Search web for {query}", f"Searching for {query}.", {"query": query})
+        return response("search_web", f"Search web for {query}", f"{query} के लिए खोज कर रहा हूं।", {"query": query})
 
     open_match = re.search(r"(?:open|launch|start)\s+(.+)", lowered)
     if open_match:
         app_name = sanitize_spoken_text(open_match.group(1))
-        return response("open_app", f"Open {app_name}", f"Opening {app_name}.", {"app": app_name})
+        return response("open_app", f"Open {app_name}", f"{app_name} खोल रहा हूं।", {"app": app_name})
 
     close_match = re.search(r"(?:close|quit|exit)\s+(.+)", lowered)
     if close_match:
         app_name = sanitize_spoken_text(close_match.group(1))
-        return response("close_app", f"Close {app_name}", f"Closing {app_name}.", {"app": app_name})
+        return response("close_app", f"Close {app_name}", f"{app_name} बंद कर रहा हूं।", {"app": app_name})
 
     # Screenshot command
     if "screenshot" in lowered or "take screenshot" in lowered or "capture screen" in lowered:
-        return response("screenshot", "Take screenshot", "Taking a screenshot.", {"action": "screenshot"})
+        return response("screenshot", "Take screenshot", "स्क्रीनशॉट ले रहा हूं।", {"action": "screenshot"})
 
     # Window management commands
     if "minimize" in lowered or "minimize window" in lowered:
-        return response("window_control", "Minimize window", "Minimizing the current window.", {"action": "minimize"})
+        return response("window_control", "Minimize window", "विंडो मिनिमाइज़ कर रहा हूं।", {"action": "minimize"})
     if "maximize" in lowered or "maximize window" in lowered or "fullscreen" in lowered:
-        return response("window_control", "Maximize window", "Maximizing the current window.", {"action": "maximize"})
+        return response("window_control", "Maximize window", "विंडो मैक्सिमाइज़ कर रहा हूं।", {"action": "maximize"})
     if "restore" in lowered or "restore window" in lowered:
-        return response("window_control", "Restore window", "Restoring the window.", {"action": "restore"})
+        return response("window_control", "Restore window", "विंडो रिस्टोर कर रहा हूं।", {"action": "restore"})
     if "switch window" in lowered or "next window" in lowered or "alt tab" in lowered:
-        return response("window_control", "Switch window", "Switching to the next window.", {"action": "switch"})
+        return response("window_control", "Switch window", "अगली विंडो पर स्विच कर रहा हूं।", {"action": "switch"})
 
     # Copy/Paste commands
     if "copy" in lowered and "file" not in lowered:
-        return response("clipboard", "Copy", "Copying selected content.", {"action": "copy"})
+        return response("clipboard", "Copy", "चयनित सामग्री कॉपी कर रहा हूं।", {"action": "copy"})
     if "paste" in lowered:
-        return response("clipboard", "Paste", "Pasting content.", {"action": "paste"})
+        return response("clipboard", "Paste", "सामग्री पेस्ट कर रहा हूं।", {"action": "paste"})
     if "cut" in lowered:
-        return response("clipboard", "Cut", "Cutting selected content.", {"action": "cut"})
+        return response("clipboard", "Cut", "चयनित सामग्री कट कर रहा हूं।", {"action": "cut"})
 
     # Undo/Redo commands
     if "undo" in lowered:
-        return response("keyboard", "Undo", "Undoing the last action.", {"action": "undo"})
+        return response("keyboard", "Undo", "पिछली क्रिया पूर्ववत कर रहा हूं।", {"action": "undo"})
     if "redo" in lowered:
-        return response("keyboard", "Redo", "Redoing the last action.", {"action": "redo"})
+        return response("keyboard", "Redo", "पिछली क्रिया दोहरा रहा हूं।", {"action": "redo"})
 
     # Save command
     if "save" in lowered:
-        return response("keyboard", "Save", "Saving the current file.", {"action": "save"})
+        return response("keyboard", "Save", "वर्तमान फ़ाइल सेव कर रहा हूं।", {"action": "save"})
 
     # Print command
     if "print" in lowered:
-        return response("keyboard", "Print", "Opening print dialog.", {"action": "print"})
+        return response("keyboard", "Print", "प्रिंट डायलॉग खोल रहा हूं।", {"action": "print"})
 
     # Refresh command
     if "refresh" in lowered or "reload" in lowered:
-        return response("keyboard", "Refresh", "Refreshing the current page.", {"action": "refresh"})
+        return response("keyboard", "Refresh", "वर्तमान पेज रिफ्रेश कर रहा हूं।", {"action": "refresh"})
 
     # Find command
     if "find" in lowered and "file" not in lowered:
-        return response("keyboard", "Find", "Opening find dialog.", {"action": "find"})
+        return response("keyboard", "Find", "खोज डायलॉग खोल रहा हूं।", {"action": "find"})
 
     # Select all command
     if "select all" in lowered:
-        return response("keyboard", "Select all", "Selecting all content.", {"action": "select_all"})
+        return response("keyboard", "Select all", "सभी सामग्री चयन कर रहा हूं।", {"action": "select_all"})
 
     # New tab/window commands
     if "new tab" in lowered:
-        return response("keyboard", "New tab", "Opening a new tab.", {"action": "new_tab"})
+        return response("keyboard", "New tab", "नया टैब खोल रहा हूं।", {"action": "new_tab"})
     if "new window" in lowered:
-        return response("keyboard", "New window", "Opening a new window.", {"action": "new_window"})
+        return response("keyboard", "New window", "नई विंडो खोल रहा हूं।", {"action": "new_window"})
 
     # Close tab/window commands
     if "close tab" in lowered:
-        return response("keyboard", "Close tab", "Closing the current tab.", {"action": "close_tab"})
+        return response("keyboard", "Close tab", "वर्तमान टैब बंद कर रहा हूं।", {"action": "close_tab"})
     if "close window" in lowered:
-        return response("keyboard", "Close window", "Closing the current window.", {"action": "close_window"})
+        return response("keyboard", "Close window", "वर्तमान विंडो बंद कर रहा हूं।", {"action": "close_window"})
 
     # Zoom commands
     if "zoom in" in lowered:
-        return response("keyboard", "Zoom in", "Zooming in.", {"action": "zoom_in"})
+        return response("keyboard", "Zoom in", "ज़ूम इन कर रहा हूं।", {"action": "zoom_in"})
     if "zoom out" in lowered:
-        return response("keyboard", "Zoom out", "Zooming out.", {"action": "zoom_out"})
+        return response("keyboard", "Zoom out", "ज़ूम आउट कर रहा हूं।", {"action": "zoom_out"})
     if "zoom reset" in lowered or "reset zoom" in lowered:
-        return response("keyboard", "Reset zoom", "Resetting zoom.", {"action": "zoom_reset"})
+        return response("keyboard", "Reset zoom", "ज़ूम रीसेट कर रहा हूं।", {"action": "zoom_reset"})
 
     # Folder navigation commands
     if "open documents" in lowered or "my documents" in lowered:
-        return response("open_folder", "Open Documents", "Opening Documents folder.", {"folder": "documents"})
+        return response("open_folder", "Open Documents", "दस्तावेज़ फ़ोल्डर खोल रहा हूं।", {"folder": "documents"})
     if "open downloads" in lowered or "my downloads" in lowered:
-        return response("open_folder", "Open Downloads", "Opening Downloads folder.", {"folder": "downloads"})
+        return response("open_folder", "Open Downloads", "डाउनलोड फ़ोल्डर खोल रहा हूं।", {"folder": "downloads"})
     if "open desktop" in lowered or "go to desktop" in lowered:
-        return response("open_folder", "Open Desktop", "Opening Desktop.", {"folder": "desktop"})
+        return response("open_folder", "Open Desktop", "डेस्कटॉप खोल रहा हूं।", {"folder": "desktop"})
     if "open pictures" in lowered or "my pictures" in lowered:
-        return response("open_folder", "Open Pictures", "Opening Pictures folder.", {"folder": "pictures"})
+        return response("open_folder", "Open Pictures", "चित्र फ़ोल्डर खोल रहा हूं।", {"folder": "pictures"})
     if "open music" in lowered or "my music" in lowered:
-        return response("open_folder", "Open Music", "Opening Music folder.", {"folder": "music"})
+        return response("open_folder", "Open Music", "संगीत फ़ोल्डर खोल रहा हूं।", {"folder": "music"})
     if "open videos" in lowered or "my videos" in lowered:
-        return response("open_folder", "Open Videos", "Opening Videos folder.", {"folder": "videos"})
+        return response("open_folder", "Open Videos", "वीडियो फ़ोल्डर खोल रहा हूं।", {"folder": "videos"})
 
     # Delete file/folder command
     delete_match = re.search(r"(?:delete|remove)\s+(?:file\s+)?(.+)", lowered)
     if delete_match:
         path = delete_match.group(1).strip()
-        return response("delete_file", f"Delete {path}", f"Are you sure you want to delete {path}?", {"path": path}, requires_confirmation=True)
+        return response("delete_file", f"Delete {path}", f"क्या आप वाकई {path} को हटाना चाहते हैं?", {"path": path}, requires_confirmation=True)
 
     # Show desktop command
     if "show desktop" in lowered:
-        return response("window_control", "Show desktop", "Showing desktop.", {"action": "show_desktop"})
+        return response("window_control", "Show desktop", "डेस्कटॉप दिखा रहा हूं।", {"action": "show_desktop"})
 
     # Lock screen command (already handled but adding more variations)
     if "sign out" in lowered or "log out" in lowered:
-        return response("system_control", "Sign out", "Signing out from the current session.", {"command": "signout"}, requires_confirmation=True)
+        return response("system_control", "Sign out", "वर्तमान सत्र से साइन आउट कर रहा हूं।", {"command": "signout"}, requires_confirmation=True)
 
     # Hibernate command
     if "hibernate" in lowered:
-        return response("system_control", "Hibernate", "Hibernating the system.", {"command": "hibernate"})
+        return response("system_control", "Hibernate", "सिस्टम हाइबरनेट कर रहा हूं।", {"command": "hibernate"})
 
     # Empty recycle bin command
     if "empty recycle bin" in lowered or "empty trash" in lowered:
-        return response("system_control", "Empty recycle bin", "Emptying the recycle bin.", {"command": "empty_recycle_bin"}, requires_confirmation=True)
+        return response("system_control", "Empty recycle bin", "रिसाइकल बिन खाली कर रहा हूं।", {"command": "empty_recycle_bin"}, requires_confirmation=True)
 
     # Open task manager
     if "task manager" in lowered:
-        return response("open_app", "Open Task Manager", "Opening Task Manager.", {"app": "task manager"})
+        return response("open_app", "Open Task Manager", "टास्क मैनेजर खोल रहा हूं।", {"app": "task manager"})
 
     # Open system settings variations
     if "open settings" in lowered or "system settings" in lowered:
-        return response("open_app", "Open Settings", "Opening Settings.", {"app": "settings"})
+        return response("open_app", "Open Settings", "सेटिंग्स खोल रहा हूं।", {"app": "settings"})
 
     # Open control panel variations
     if "open control panel" in lowered:
-        return response("open_app", "Open Control Panel", "Opening Control Panel.", {"app": "control panel"})
+        return response("open_app", "Open Control Panel", "कंट्रोल पैनल खोल रहा हूं।", {"app": "control panel"})
 
     # Open file explorer variations
     if "open file explorer" in lowered or "open explorer" in lowered or "open folders" in lowered:
-        return response("open_app", "Open File Explorer", "Opening File Explorer.", {"app": "file explorer"})
+        return response("open_app", "Open File Explorer", "फ़ाइल एक्सप्लोरर खोल रहा हूं।", {"app": "file explorer"})
 
     # Take photo command (if webcam available)
     if "take photo" in lowered or "take picture" in lowered or "capture photo" in lowered:
-        return response("camera", "Take photo", "Taking a photo with the webcam.", {"action": "take_photo"})
+        return response("camera", "Take photo", "वेबकैम से फोटो ले रहा हूं।", {"action": "take_photo"})
 
     # Record screen command
     if "record screen" in lowered or "screen recording" in lowered:
-        return response("screen_record", "Record screen", "Starting screen recording.", {"action": "start_record"})
+        return response("screen_record", "Record screen", "स्क्रीन रिकॉर्डिंग शुरू कर रहा हूं।", {"action": "start_record"})
 
     # Stop recording command
     if "stop recording" in lowered:
-        return response("screen_record", "Stop recording", "Stopping screen recording.", {"action": "stop_record"})
+        return response("screen_record", "Stop recording", "स्क्रीन रिकॉर्डिंग बंद कर रहा हूं।", {"action": "stop_record"})
 
     # Open calculator variations
     if "open calculator" in lowered or "calculate" in lowered and "what is" not in lowered:
-        return response("open_app", "Open Calculator", "Opening Calculator.", {"app": "calculator"})
+        return response("open_app", "Open Calculator", "कैलकुलेटर खोल रहा हूं।", {"app": "calculator"})
 
     # Open notepad variations
     if "open notepad" in lowered or "new note" in lowered:
-        return response("open_app", "Open Notepad", "Opening Notepad.", {"app": "notepad"})
+        return response("open_app", "Open Notepad", "नोटपैड खोल रहा हूं।", {"app": "notepad"})
 
     # Open command prompt variations
     if "open command prompt" in lowered or "open cmd" in lowered:
-        return response("open_app", "Open Command Prompt", "Opening Command Prompt.", {"app": "cmd"})
+        return response("open_app", "Open Command Prompt", "कमांड प्रॉम्प्ट खोल रहा हूं।", {"app": "cmd"})
 
     # Open PowerShell variations
     if "open powershell" in lowered or "open terminal" in lowered:
-        return response("open_app", "Open PowerShell", "Opening PowerShell.", {"app": "powershell"})
+        return response("open_app", "Open PowerShell", "PowerShell खोल रहा हूं।", {"app": "powershell"})
 
     # Clear screen command
     if "clear screen" in lowered or "cls" in lowered:
-        return response("keyboard", "Clear screen", "Clearing the terminal screen.", {"action": "clear_screen"})
+        return response("keyboard", "Clear screen", "टर्मिनल स्क्रीन साफ़ कर रहा हूं।", {"action": "clear_screen"})
 
     # List files command
     if "list files" in lowered or "show files" in lowered or "ls" in lowered:
-        return response("file_system", "List files", "Listing files in current directory.", {"action": "list_files"})
+        return response("file_system", "List files", "वर्तमान निर्देशिका में फ़ाइलें सूचीबद्ध कर रहा हूं।", {"action": "list_files"})
 
     # Go back command
     if "go back" in lowered or "back" in lowered:
-        return response("navigation", "Go back", "Going back.", {"action": "go_back"})
+        return response("navigation", "Go back", "पीछे जा रहा हूं।", {"action": "go_back"})
 
     # Go forward command
     if "go forward" in lowered or "forward" in lowered:
-        return response("navigation", "Go forward", "Going forward.", {"action": "go_forward"})
+        return response("navigation", "Go forward", "आगे जा रहा हूं।", {"action": "go_forward"})
 
     # Go home command
     if "go home" in lowered or "home" in lowered:
-        return response("navigation", "Go home", "Going to home page.", {"action": "go_home"})
+        return response("navigation", "Go home", "होम पेज पर जा रहा हूं।", {"action": "go_home"})
 
     # Open URL directly
     url_match = re.search(r"(?:open|go to|visit)\s+(https?://[^\s]+)", lowered)
     if url_match:
         url = url_match.group(1).strip()
-        return response("open_app", f"Open {url}", f"Opening {url}.", {"app": url})
+        return response("open_app", f"Open {url}", f"{url} खोल रहा हूं।", {"app": url})
 
     # Search YouTube directly
     youtube_search_match = re.search(r"(?:search|play)\s+(?:on\s+)?youtube\s+(?:for\s+)?(.+)", lowered)
     if youtube_search_match:
         query = youtube_search_match.group(1).strip()
-        return response("open_and_search", "Search YouTube", f"Searching YouTube for {query}.", {"app": "youtube", "search_query": query}, confidence=90)
+        return response("open_and_search", "Search YouTube", f"YouTube पर {query} के लिए खोज कर रहा हूं।", {"app": "youtube", "search_query": query}, confidence=90)
 
     # Play music on Spotify
     spotify_match = re.search(r"(?:play\s+)?(?:on\s+)?spotify\s+(.+)", lowered)
     if spotify_match:
         query = spotify_match.group(1).strip()
-        return response("open_and_search", "Play on Spotify", f"Playing {query} on Spotify.", {"app": "spotify", "search_query": query}, confidence=88)
+        return response("open_and_search", "Play on Spotify", f"Spotify पर {query} चला रहा हूं।", {"app": "spotify", "search_query": query}, confidence=88)
 
     # Advanced System Commands
     if "disk cleanup" in lowered or "clean disk" in lowered:
-        return response("system_control", "Disk cleanup", "Opening disk cleanup utility.", {"command": "disk_cleanup"}, requires_confirmation=True)
+        return response("system_control", "Disk cleanup", "डिस्क क्लीनअप उपयोगिता खोल रहा हूं।", {"command": "disk_cleanup"}, requires_confirmation=True)
 
     if "system information" in lowered or "system info" in lowered:
-        return response("system_info", "System information", "Opening system information.", {"action": "system_info"})
+        return response("system_info", "System information", "सिस्टम जानकारी खोल रहा हूं।", {"action": "system_info"})
 
     if "network status" in lowered or "network info" in lowered:
-        return response("system_info", "Network status", "Checking network status.", {"action": "network_status"})
+        return response("system_info", "Network status", "नेटवर्क स्थिति जांच रहा हूं।", {"action": "network_status"})
 
     if "running processes" in lowered or "process list" in lowered or "task list" in lowered:
-        return response("system_info", "Running processes", "Opening task manager to view processes.", {"action": "process_list"})
+        return response("system_info", "Running processes", "प्रक्रियाओं को देखने के लिए टास्क मैनेजर खोल रहा हूं।", {"action": "process_list"})
 
     if "check updates" in lowered or "windows update" in lowered:
-        return response("system_control", "Check for updates", "Opening Windows Update.", {"command": "check_updates"})
+        return response("system_control", "Check for updates", "Windows अपडेट खोल रहा हूं।", {"command": "check_updates"})
 
     if "disk space" in lowered or "storage space" in lowered:
-        return response("system_info", "Disk space", "Checking disk space.", {"action": "disk_space"})
+        return response("system_info", "Disk space", "डिस्क स्थान जांच रहा हूं।", {"action": "disk_space"})
 
     if "memory usage" in lowered or "ram usage" in lowered:
-        return response("system_info", "Memory usage", "Checking memory usage.", {"action": "memory_usage"})
+        return response("system_info", "Memory usage", "मेमोरी उपयोग जांच रहा हूं।", {"action": "memory_usage"})
 
     if "cpu usage" in lowered or "processor usage" in lowered:
-        return response("system_info", "CPU usage", "Checking CPU usage.", {"action": "cpu_usage"})
+        return response("system_info", "CPU usage", "CPU उपयोग जांच रहा हूं।", {"action": "cpu_usage"})
 
     if "battery status" in lowered or "battery info" in lowered:
-        return response("system_info", "Battery status", "Checking battery status.", {"action": "battery_status"})
+        return response("system_info", "Battery status", "बैटरी स्थिति जांच रहा हूं।", {"action": "battery_status"})
 
     if "network speed" in lowered or "internet speed" in lowered:
-        return response("system_info", "Network speed", "Opening speed test in browser.", {"action": "network_speed"})
+        return response("system_info", "Network speed", "ब्राउज़र में स्पीड टेस्ट खोल रहा हूं।", {"action": "network_speed"})
 
     if "ping" in lowered:
         ping_match = re.search(r"ping\s+(.+)", lowered)
         if ping_match:
             target = ping_match.group(1).strip()
-            return response("network_tool", "Ping", f"Pinging {target}.", {"action": "ping", "target": target})
-        return response("network_tool", "Ping", "Pinging default gateway.", {"action": "ping", "target": "google.com"})
+            return response("network_tool", "Ping", f"{target} को पिंग कर रहा हूं।", {"action": "ping", "target": target})
+        return response("network_tool", "Ping", "डिफ़ॉल्ट गेटवे को पिंग कर रहा हूं।", {"action": "ping", "target": "google.com"})
 
     if "trace route" in lowered or "traceroute" in lowered:
         traceroute_match = re.search(r"(?:trace route|traceroute)\s+(.+)", lowered)
         if traceroute_match:
             target = traceroute_match.group(1).strip()
-            return response("network_tool", "Trace route", f"Tracing route to {target}.", {"action": "traceroute", "target": target})
+            return response("network_tool", "Trace route", f"{target} तक मार्ग का पता लगा रहा हूं।", {"action": "traceroute", "target": target})
 
     if "flush dns" in lowered or "clear dns" in lowered:
-        return response("network_tool", "Flush DNS", "Flushing DNS cache.", {"action": "flush_dns"})
+        return response("network_tool", "Flush DNS", "DNS कैश साफ़ कर रहा हूं।", {"action": "flush_dns"})
 
     if "restart network" in lowered or "reset network" in lowered:
-        return response("network_tool", "Restart network", "Restarting network adapter.", {"action": "restart_network"}, requires_confirmation=True)
+        return response("network_tool", "Restart network", "नेटवर्क एडाप्टर पुनः आरंभ कर रहा हूं।", {"action": "restart_network"}, requires_confirmation=True)
 
     if "check firewall" in lowered or "firewall status" in lowered:
-        return response("system_info", "Firewall status", "Checking firewall status.", {"action": "firewall_status"})
+        return response("system_info", "Firewall status", "फ़ायरवॉल स्थिति जांच रहा हूं।", {"action": "firewall_status"})
 
     if "check antivirus" in lowered or "antivirus status" in lowered:
-        return response("system_info", "Antivirus status", "Checking antivirus status.", {"action": "antivirus_status"})
+        return response("system_info", "Antivirus status", "एंटीवायरस स्थिति जांच रहा हूं।", {"action": "antivirus_status"})
 
     # Automation Commands
     if "create shortcut" in lowered:
         shortcut_match = re.search(r"create shortcut\s+(?:for\s+)?(.+)", lowered)
         if shortcut_match:
             target = shortcut_match.group(1).strip()
-            return response("automation", "Create shortcut", f"Creating shortcut for {target}.", {"action": "create_shortcut", "target": target})
+            return response("automation", "Create shortcut", f"{target} के लिए शॉर्टकट बना रहा हूं।", {"action": "create_shortcut", "target": target})
 
     if "schedule task" in lowered or "create task" in lowered:
-        return response("automation", "Schedule task", "Opening Task Scheduler.", {"action": "schedule_task"})
+        return response("automation", "Schedule task", "टास्क शेड्यूलर खोल रहा हूं।", {"action": "schedule_task"})
 
     if "run as administrator" in lowered:
-        return response("automation", "Run as admin", "Please specify which application to run as administrator.", {"action": "run_as_admin"})
+        return response("automation", "Run as admin", "कृपया बताएं कि किस एप्लिकेशन को एडमिनिस्ट्रेटर के रूप में चलाना है।", {"action": "run_as_admin"})
 
     if "open with admin" in lowered:
         admin_match = re.search(r"open\s+(.+)\s+(?:with\s+)?admin", lowered)
         if admin_match:
             app = admin_match.group(1).strip()
-            return response("open_app", f"Open {app} as admin", f"Opening {app} as administrator.", {"app": app, "run_as_admin": True})
+            return response("open_app", f"Open {app} as admin", f"{app} को एडमिनिस्ट्रेटर के रूप में खोल रहा हूं।", {"app": app, "run_as_admin": True})
 
     if "system restore" in lowered:
-        return response("system_control", "System restore", "Opening System Restore.", {"command": "system_restore"}, requires_confirmation=True)
+        return response("system_control", "System restore", "सिस्टम रिस्टोर खोल रहा हूं।", {"command": "system_restore"}, requires_confirmation=True)
 
     if "check system health" in lowered or "health check" in lowered:
-        return response("system_info", "System health check", "Running system health check.", {"action": "health_check"})
+        return response("system_info", "System health check", "सिस्टम हेल्थ चेक चला रहा हूं।", {"action": "health_check"})
 
     if "view event logs" in lowered or "event logs" in lowered:
-        return response("system_info", "Event logs", "Opening Event Viewer.", {"action": "event_logs"})
+        return response("system_info", "Event logs", "इवेंट व्यूअर खोल रहा हूं।", {"action": "event_logs"})
 
     if "check services" in lowered or "services list" in lowered:
-        return response("system_info", "Services", "Opening Services manager.", {"action": "services"})
+        return response("system_info", "Services", "सर्विसेज मैनेजर खोल रहा हूं।", {"action": "services"})
 
     if "manage startup" in lowered or "startup programs" in lowered:
-        return response("system_info", "Startup programs", "Opening Task Manager to manage startup programs.", {"action": "startup"})
+        return response("system_info", "Startup programs", "स्टार्टअप प्रोग्राम प्रबंधित करने के लिए टास्क मैनेजर खोल रहा हूं।", {"action": "startup"})
 
     if "device manager" in lowered:
-        return response("system_info", "Device manager", "Opening Device Manager.", {"action": "device_manager"})
+        return response("system_info", "Device manager", "डिवाइस मैनेजर खोल रहा हूं।", {"action": "device_manager"})
 
     if "performance monitor" in lowered or "performance" in lowered:
-        return response("system_info", "Performance monitor", "Opening Performance Monitor.", {"action": "performance_monitor"})
+        return response("system_info", "Performance monitor", "परफॉर्मेंस मॉनिटर खोल रहा हूं।", {"action": "performance_monitor"})
 
     # Productivity and Workflow Commands
     if "pomodoro" in lowered or "pomodoro timer" in lowered:
-        return response("productivity", "Pomodoro timer", "Starting 25-minute Pomodoro timer.", {"action": "pomodoro_start"})
+        return response("productivity", "Pomodoro timer", "25-मिनट का पोमोडोरो टाइमर शुरू कर रहा हूं।", {"action": "pomodoro_start"})
 
     if "start focus" in lowered or "focus mode" in lowered:
-        return response("productivity", "Focus mode", "Enabling focus mode - notifications will be minimized.", {"action": "focus_mode"})
+        return response("productivity", "Focus mode", "फोकस मोड सक्षम कर रहा हूं - नोटिफिकेशन कम हो जाएंगे।", {"action": "focus_mode"})
 
     if "break time" in lowered or "take a break" in lowered:
-        return response("productivity", "Break time", "Starting 5-minute break.", {"action": "break_start"})
+        return response("productivity", "Break time", "5-मिनट का ब्रेक शुरू कर रहा हूं।", {"action": "break_start"})
 
     if "start timer" in lowered:
         timer_match = re.search(r"start timer\s+(?:for\s+)?(\d+)\s*(?:minute|min|m)?", lowered)
         if timer_match:
             minutes = int(timer_match.group(1))
-            return response("productivity", "Timer", f"Starting timer for {minutes} minutes.", {"action": "timer_start", "minutes": minutes})
-        return response("productivity", "Timer", "Starting 10-minute timer.", {"action": "timer_start", "minutes": 10})
+            return response("productivity", "Timer", f"{minutes} मिनट का टाइमर शुरू कर रहा हूं।", {"action": "timer_start", "minutes": minutes})
+        return response("productivity", "Timer", "10-मिनट का टाइमर शुरू कर रहा हूं।", {"action": "timer_start", "minutes": 10})
 
     if "stop timer" in lowered or "cancel timer" in lowered:
-        return response("productivity", "Stop timer", "Stopping timer.", {"action": "timer_stop"})
+        return response("productivity", "Stop timer", "टाइमर बंद कर रहा हूं।", {"action": "timer_stop"})
 
     if "create todo" in lowered or "add todo" in lowered or "add task" in lowered:
         todo_match = re.search(r"(?:create todo|add todo|add task)\s+(.+)", lowered)
         if todo_match:
             task = todo_match.group(1).strip()
-            return response("productivity", "Create todo", f"Added todo: {task}", {"action": "create_todo", "task": task})
-        return response("productivity", "Create todo", "Please specify the task.", {"action": "create_todo"})
+            return response("productivity", "Create todo", f"टूडो जोड़ा: {task}", {"action": "create_todo", "task": task})
+        return response("productivity", "Create todo", "कृपया कार्य निर्दिष्ट करें।", {"action": "create_todo"})
 
     if "show todos" in lowered or "list todos" in lowered or "my tasks" in lowered:
-        return response("productivity", "Show todos", "Showing your todo list.", {"action": "show_todos"})
+        return response("productivity", "Show todos", "आपकी टूडो सूची दिखा रहा हूं।", {"action": "show_todos"})
 
     if "complete todo" in lowered or "done todo" in lowered:
         todo_match = re.search(r"(?:complete todo|done todo)\s+(.+)", lowered)
         if todo_match:
             task = todo_match.group(1).strip()
-            return response("productivity", "Complete todo", f"Marked todo as done: {task}", {"action": "complete_todo", "task": task})
-        return response("productivity", "Complete todo", "Please specify which task to complete.", {"action": "complete_todo"})
+            return response("productivity", "Complete todo", f"टूडो को पूर्ण के रूप में चिह्नित किया: {task}", {"action": "complete_todo", "task": task})
+        return response("productivity", "Complete todo", "कृपया बताएं कि कौन सा टूडो पूरा करना है।", {"action": "complete_todo"})
 
     if "delete todo" in lowered or "remove todo" in lowered:
         todo_match = re.search(r"(?:delete todo|remove todo)\s+(.+)", lowered)
         if todo_match:
             task = todo_match.group(1).strip()
-            return response("productivity", "Delete todo", f"Deleted todo: {task}", {"action": "delete_todo", "task": task})
-        return response("productivity", "Delete todo", "Please specify which task to delete.", {"action": "delete_todo"})
+            return response("productivity", "Delete todo", f"टूडो हटाया: {task}", {"action": "delete_todo", "task": task})
+        return response("productivity", "Delete todo", "कृपया बताएं कि कौन सा टूडो हटाना है।", {"action": "delete_todo"})
 
     if "quick note" in lowered or "jot down" in lowered:
         note_match = re.search(r"(?:quick note|jot down)\s+(.+)", lowered)
         if note_match:
             note = note_match.group(1).strip()
-            return response("productivity", "Quick note", f"Saved quick note: {note}", {"action": "quick_note", "note": note})
-        return response("productivity", "Quick note", "Please specify the note.", {"action": "quick_note"})
+            return response("productivity", "Quick note", f"त्वरित नोट सहेजा: {note}", {"action": "quick_note", "note": note})
+        return response("productivity", "Quick note", "कृपया नोट निर्दिष्ट करें।", {"action": "quick_note"})
 
     if "show notes" in lowered or "my notes" in lowered:
-        return response("productivity", "Show notes", "Showing your quick notes.", {"action": "show_notes"})
+        return response("productivity", "Show notes", "आपके त्वरित नोट्स दिखा रहा हूं।", {"action": "show_notes"})
 
     if "daily plan" in lowered or "plan my day" in lowered:
-        return response("productivity", "Daily plan", "Opening daily planning template.", {"action": "daily_plan"})
+        return response("productivity", "Daily plan", "दैनिक योजना टेम्पलेट खोल रहा हूं।", {"action": "daily_plan"})
 
     if "weekly review" in lowered or "review week" in lowered:
-        return response("productivity", "Weekly review", "Opening weekly review template.", {"action": "weekly_review"})
+        return response("productivity", "Weekly review", "साप्ताहिक समीक्षा टेम्पलेट खोल रहा हूं।", {"action": "weekly_review"})
 
     # Keep only useful productivity tools that actually work
     if "translate text" in lowered:
-        return response("productivity", "Translate text", "Opening translation tool.", {"action": "translate_text"})
+        return response("productivity", "Translate text", "अनुवाद उपकरण खोल रहा हूं।", {"action": "translate_text"})
 
     if "grammar check" in lowered or "check grammar" in lowered:
-        return response("productivity", "Grammar check", "Opening grammar checker.", {"action": "grammar_check"})
+        return response("productivity", "Grammar check", "व्याकरण जांचक खोल रहा हूं।", {"action": "grammar_check"})
 
     if "word count" in lowered:
-        return response("productivity", "Word count", "Opening word count tool.", {"action": "word_count"})
+        return response("productivity", "Word count", "शब्द गणना उपकरण खोल रहा हूं।", {"action": "word_count"})
 
     return response(
         "general_query",
         "Respond to query",
-        "I can help with app launch, search, typing, volume, brightness, media, window control, screenshots, clipboard, keyboard shortcuts, folder navigation, system commands, network tools, automation, system information, productivity tools, timers, todos, and notes.",
+        "मैं ऐप लॉन्च, खोज, टाइपिंग, वॉल्यूम, ब्राइटनेस, मीडिया, विंडो नियंत्रण, स्क्रीनशॉट, क्लिपबोर्ड, कीबोर्ड शॉर्टकट, फ़ोल्डर नेविगेशन, सिस्टम कमांड, नेटवर्क टूल, ऑटोमेशन, सिस्टम जानकारी, उत्पादकता टूल, टाइमर, टूडो और नोट्स में मदद कर सकता हूं।",
         confidence=55,
     )
 

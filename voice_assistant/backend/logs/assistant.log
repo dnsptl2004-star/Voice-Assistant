@@ -874,3 +874,104 @@
 2026-04-24 15:28:19,749 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'brightness_control', 'parameters': {'action': 'up'}, 'confirmed': False}"
 2026-04-24 15:28:20,142 INFO execute_command intent='brightness_control' parameters="{'action': 'up'}" confirmed='False' success='True' message='Brightness increased'
 2026-04-24 15:28:20,155 INFO client_log level='info' event='execute_command_response' message='Brightness increased' details="{'intent': 'brightness_control', 'parameters': {'action': 'up'}, 'confirmed': False, 'result': {'message': 'Brightness increased', 'success': True}}"
+2026-04-27 10:16:31,096 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-27 10:16:31,107 INFO process_command user_input='open notepad' intent='open_app' response='Opening notepad.' parameters="{'app': 'notepad'}"
+2026-04-27 10:16:31,125 INFO client_log level='info' event='process_command_response' message='Opening notepad.' details="{'text': 'open notepad', 'intent': 'open_app'}"
+2026-04-27 10:16:31,128 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False}"
+2026-04-27 10:16:31,143 INFO launch_windows_target_begin target='notepad' normalized='notepad'
+2026-04-27 10:16:33,195 INFO powershell_start_process file_path='C:\\WINDOWS\\system32\\notepad.EXE' arguments='[]' returncode='0' stdout='' stderr=''
+2026-04-27 10:16:33,195 INFO launch_windows_target_success target='notepad' mode='powershell-start'
+2026-04-27 10:16:33,196 INFO execute_command intent='open_app' parameters="{'app': 'notepad'}" confirmed='False' success='True' message='Opened notepad'
+2026-04-27 10:16:33,208 INFO client_log level='info' event='execute_command_response' message='Opened notepad' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False, 'result': {'message': 'Opened notepad', 'success': True}}"
+2026-04-27 10:16:51,589 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'who are you'}"
+2026-04-27 10:16:54,946 INFO process_command user_input='who are you' intent='general_query' response='I’m your desktop voice assistant, here to help with your questions and tasks quickly and efficiently. How can I assist you today?' parameters='{}'
+2026-04-27 10:16:54,964 INFO client_log level='info' event='process_command_response' message='I’m your desktop voice assistant, here to help with your questions and tasks quickly and efficiently. How can I assist you today?' details="{'text': 'who are you', 'intent': 'general_query'}"
+2026-04-27 10:17:26,709 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'what is ai'}"
+2026-04-27 10:17:30,267 INFO process_command user_input='what is ai' intent='general_query' response='AI, or artificial intelligence, refers to computer systems designed to perform tasks that typically require human intelligence, such as learning, reasoning, problem-solving, and understanding language. It enables machines to mimic cognitive functions and improve over time.' parameters='{}'
+2026-04-27 10:17:30,280 INFO client_log level='info' event='process_command_response' message='AI, or artificial intelligence, refers to computer systems designed to perform tasks that typically require human intelligence, such as learning, reasoning, problem-solving, and understanding language. It enables machines to mimic cognitive functions and improve over time.' details="{'text': 'what is ai', 'intent': 'general_query'}"
+2026-04-27 10:18:17,932 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'tum kon ho'}"
+2026-04-27 10:18:21,678 INFO process_command user_input='tum kon ho' intent='general_query' response='Main ek AI assistant hoon jo aapki madad ke liye yahan hai. Aapko kisi bhi sawaal ka jawab chahiye toh pooch sakte hain.' parameters='{}'
+2026-04-27 10:18:21,696 INFO client_log level='info' event='process_command_response' message='Main ek AI assistant hoon jo aapki madad ke liye yahan hai. Aapko kisi bhi sawaal ka jawab chahiye toh pooch sakte hain.' details="{'text': 'tum kon ho', 'intent': 'general_query'}"
+2026-04-27 10:24:01,191 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-27 10:24:01,202 INFO process_command user_input='open notepad' intent='open_app' response='notepad खोल रहा हूं।' parameters="{'app': 'notepad'}"
+2026-04-27 10:24:01,214 INFO client_log level='info' event='process_command_response' message='notepad खोल रहा हूं।' details="{'text': 'open notepad', 'intent': 'open_app'}"
+2026-04-27 10:24:01,217 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False}"
+2026-04-27 10:24:01,228 INFO launch_windows_target_begin target='notepad' normalized='notepad'
+2026-04-27 10:24:04,236 INFO powershell_start_process file_path='C:\\WINDOWS\\system32\\notepad.EXE' arguments='[]' returncode='0' stdout='' stderr=''
+2026-04-27 10:24:04,236 INFO launch_windows_target_success target='notepad' mode='powershell-start'
+2026-04-27 10:24:04,236 INFO execute_command intent='open_app' parameters="{'app': 'notepad'}" confirmed='False' success='True' message='Opened notepad'
+2026-04-27 10:24:04,249 INFO client_log level='info' event='execute_command_response' message='Opened notepad' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False, 'result': {'message': 'Opened notepad', 'success': True}}"
+2026-04-27 10:24:18,191 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'what can you do'}"
+2026-04-27 10:24:22,456 INFO process_command user_input='what can you do' intent='general_query' response='मैं आपकी मदद कर सकता हूँ जैसे सवालों के जवाब देना, जानकारी देना, रिमाइंडर सेट करना, मौसम बताना, और सामान्य ज्ञान से जुड़ी बातें साझा करना। आप मुझसे कुछ भी पूछ सकते हैं!' parameters='{}'
+2026-04-27 10:24:22,477 INFO client_log level='info' event='process_command_response' message='मैं आपकी मदद कर सकता हूँ जैसे सवालों के जवाब देना, जानकारी देना, रिमाइंडर सेट करना, मौसम बताना, और सामान्य ज्ञान से जुड़ी बातें साझा करना। आप मुझसे कुछ भी पूछ सकते हैं!' details="{'text': 'what can you do', 'intent': 'general_query'}"
+2026-04-27 10:25:04,221 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'what can you do'}"
+2026-04-27 10:25:04,225 INFO process_command user_input='what can you do' intent='general_query' response='मैं आपकी मदद कर सकता हूँ जैसे सवालों के जवाब देना, जानकारी देना, रिमाइंडर सेट करना, मौसम बताना, और सामान्य ज्ञान से जुड़ी बातें साझा करना। आप मुझसे कुछ भी पूछ सकते हैं!' parameters='{}'
+2026-04-27 10:25:04,242 INFO client_log level='info' event='process_command_response' message='मैं आपकी मदद कर सकता हूँ जैसे सवालों के जवाब देना, जानकारी देना, रिमाइंडर सेट करना, मौसम बताना, और सामान्य ज्ञान से जुड़ी बातें साझा करना। आप मुझसे कुछ भी पूछ सकते हैं!' details="{'text': 'what can you do', 'intent': 'general_query'}"
+2026-04-27 10:25:12,497 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'hello there'}"
+2026-04-27 10:25:15,721 INFO process_command user_input='hello there' intent='general_query' response='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' parameters='{}'
+2026-04-27 10:25:15,741 INFO client_log level='info' event='process_command_response' message='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' details="{'text': 'hello there', 'intent': 'general_query'}"
+2026-04-27 10:25:29,892 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'hello there'}"
+2026-04-27 10:25:29,894 INFO process_command user_input='hello there' intent='general_query' response='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' parameters='{}'
+2026-04-27 10:25:29,919 INFO client_log level='info' event='process_command_response' message='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' details="{'text': 'hello there', 'intent': 'general_query'}"
+2026-04-27 10:25:35,291 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'hello there'}"
+2026-04-27 10:25:35,293 INFO process_command user_input='hello there' intent='general_query' response='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' parameters='{}'
+2026-04-27 10:25:35,304 INFO client_log level='info' event='process_command_response' message='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' details="{'text': 'hello there', 'intent': 'general_query'}"
+2026-04-27 10:25:38,795 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'tell me a joke'}"
+2026-04-27 10:25:42,441 INFO process_command user_input='tell me a joke' intent='general_query' response='एक आदमी डॉक्टर के पास गया और बोला, "डॉक्टर साहब, मुझे भूलने की बीमारी हो गई है।"  \nडॉक्टर: "कब से?"  \nआदमी: "कब से क्या?"' parameters='{}'
+2026-04-27 10:25:42,461 INFO client_log level='info' event='process_command_response' message='एक आदमी डॉक्टर के पास गया और बोला, "डॉक्टर साहब, मुझे भूलने की बीमारी हो गई है।"  \nडॉक्टर: "कब से?"  \nआदमी: "कब से क्या?"' details="{'text': 'tell me a joke', 'intent': 'general_query'}"
+2026-04-27 10:26:11,016 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'what is ai'}"
+2026-04-27 10:26:15,001 INFO process_command user_input='what is ai' intent='general_query' response='AI यानी आर्टिफिशियल इंटेलिजेंस, मशीनों को इंसानों जैसी सोचने, सीखने और निर्णय लेने की क्षमता देना है। यह कंप्यूटर प्रोग्राम्स और एल्गोरिदम के जरिए काम करता है।' parameters='{}'
+2026-04-27 10:26:15,017 INFO client_log level='info' event='process_command_response' message='AI यानी आर्टिफिशियल इंटेलिजेंस, मशीनों को इंसानों जैसी सोचने, सीखने और निर्णय लेने की क्षमता देना है। यह कंप्यूटर प्रोग्राम्स और एल्गोरिदम के जरिए काम करता है।' details="{'text': 'what is ai', 'intent': 'general_query'}"
+2026-04-27 10:28:45,946 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'hello there'}"
+2026-04-27 10:28:45,956 INFO process_command user_input='hello there' intent='general_query' response='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' parameters='{}'
+2026-04-27 10:28:46,031 INFO client_log level='info' event='process_command_response' message='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' details="{'text': 'hello there', 'intent': 'general_query'}"
+2026-04-27 10:28:55,981 INFO process_command user_input='what can you do' intent='general_query' response='मैं आपकी मदद कर सकता हूँ जैसे सवालों के जवाब देना, जानकारी देना, रिमाइंडर सेट करना, मौसम बताना, और सामान्य ज्ञान से जुड़ी बातें साझा करना। आप मुझसे कुछ भी पूछ सकते हैं!' parameters='{}'
+2026-04-27 10:28:55,983 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'what can you do'}"
+2026-04-27 10:28:55,998 INFO client_log level='info' event='process_command_response' message='मैं आपकी मदद कर सकता हूँ जैसे सवालों के जवाब देना, जानकारी देना, रिमाइंडर सेट करना, मौसम बताना, और सामान्य ज्ञान से जुड़ी बातें साझा करना। आप मुझसे कुछ भी पूछ सकते हैं!' details="{'text': 'what can you do', 'intent': 'general_query'}"
+2026-04-27 10:29:07,404 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'what time is it'}"
+2026-04-27 10:29:10,747 INFO process_command user_input='what time is it' intent='general_query' response='मुझे समय बताने की क्षमता नहीं है। कृपया अपने डिवाइस पर समय देखें।' parameters='{}'
+2026-04-27 10:29:10,765 INFO client_log level='info' event='process_command_response' message='मुझे समय बताने की क्षमता नहीं है। कृपया अपने डिवाइस पर समय देखें।' details="{'text': 'what time is it', 'intent': 'general_query'}"
+2026-04-27 10:36:51,809 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'hello there'}"
+2026-04-27 10:36:55,373 INFO process_command user_input='hello there' intent='general_query' response='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' parameters='{}'
+2026-04-27 10:36:55,442 INFO client_log level='info' event='process_command_response' message='नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?' details="{'text': 'hello there', 'intent': 'general_query'}"
+2026-04-27 10:37:08,085 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'tell me a joke'}"
+2026-04-27 10:37:12,483 INFO process_command user_input='tell me a joke' intent='general_query' response='एक आदमी डॉक्टर के पास गया और बोला, "डॉक्टर साहब, मुझे भूलने की बीमारी हो गई है।"  \nडॉक्टर: "कब से?"  \nआदमी: "कब से क्या?"' parameters='{}'
+2026-04-27 10:37:12,501 INFO client_log level='info' event='process_command_response' message='एक आदमी डॉक्टर के पास गया और बोला, "डॉक्टर साहब, मुझे भूलने की बीमारी हो गई है।"  \nडॉक्टर: "कब से?"  \nआदमी: "कब से क्या?"' details="{'text': 'tell me a joke', 'intent': 'general_query'}"
+2026-04-27 10:37:20,716 INFO client_log level='info' event='managed_open' message='Opened youtube.' details="{'text': 'open youtube', 'app': 'youtube', 'success': True}"
+2026-04-27 10:37:32,002 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open notepad'}"
+2026-04-27 10:37:32,006 INFO process_command user_input='open notepad' intent='open_app' response='notepad खोल रहा हूं।' parameters="{'app': 'notepad'}"
+2026-04-27 10:37:32,021 INFO client_log level='info' event='process_command_response' message='notepad खोल रहा हूं।' details="{'text': 'open notepad', 'intent': 'open_app'}"
+2026-04-27 10:37:32,022 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False}"
+2026-04-27 10:37:32,031 INFO launch_windows_target_begin target='notepad' normalized='notepad'
+2026-04-27 10:37:34,463 INFO powershell_start_process file_path='C:\\WINDOWS\\system32\\notepad.EXE' arguments='[]' returncode='0' stdout='' stderr=''
+2026-04-27 10:37:34,463 INFO launch_windows_target_success target='notepad' mode='powershell-start'
+2026-04-27 10:37:34,464 INFO execute_command intent='open_app' parameters="{'app': 'notepad'}" confirmed='False' success='True' message='Opened notepad'
+2026-04-27 10:37:34,479 INFO client_log level='info' event='execute_command_response' message='Opened notepad' details="{'intent': 'open_app', 'parameters': {'app': 'notepad'}, 'confirmed': False, 'result': {'message': 'Opened notepad', 'success': True}}"
+2026-04-27 10:40:25,240 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'tell me a joke'}"
+2026-04-27 10:40:35,473 INFO process_command user_input='tell me a joke' intent='general_query' response='बातचीत API इस समय काम नहीं कर रही है, इसलिए मैं ऑनलाइन सहायक के साथ उस प्रश्न का उत्तर नहीं दे सका। कमांड स्थानीय रूप से काम करते हैं।' parameters='{}'
+2026-04-27 10:40:35,537 INFO client_log level='info' event='process_command_response' message='बातचीत API इस समय काम नहीं कर रही है, इसलिए मैं ऑनलाइन सहायक के साथ उस प्रश्न का उत्तर नहीं दे सका। कमांड स्थानीय रूप से काम करते हैं।' details="{'text': 'tell me a joke', 'intent': 'general_query'}"
+2026-04-27 10:40:47,566 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'increase volume'}"
+2026-04-27 10:40:47,573 INFO process_command user_input='increase volume' intent='volume_control' response='वॉल्यूम बढ़ा रहा हूं।' parameters="{'action': 'up'}"
+2026-04-27 10:40:47,587 INFO client_log level='info' event='process_command_response' message='वॉल्यूम बढ़ा रहा हूं।' details="{'text': 'increase volume', 'intent': 'volume_control'}"
+2026-04-27 10:40:47,594 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'volume_control', 'parameters': {'action': 'up'}, 'confirmed': False}"
+2026-04-27 10:40:48,377 INFO execute_command intent='volume_control' parameters="{'action': 'up'}" confirmed='False' success='True' message='Volume increased'
+2026-04-27 10:40:48,408 INFO client_log level='info' event='execute_command_response' message='Volume increased' details="{'intent': 'volume_control', 'parameters': {'action': 'up'}, 'confirmed': False, 'result': {'message': 'Volume increased', 'success': True}}"
+2026-04-27 10:40:50,388 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'decrease volume'}"
+2026-04-27 10:40:50,391 INFO process_command user_input='decrease volume' intent='volume_control' response='वॉल्यूम कम कर रहा हूं।' parameters="{'action': 'down'}"
+2026-04-27 10:40:50,405 INFO client_log level='info' event='process_command_response' message='वॉल्यूम कम कर रहा हूं।' details="{'text': 'decrease volume', 'intent': 'volume_control'}"
+2026-04-27 10:40:50,410 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'volume_control', 'parameters': {'action': 'down'}, 'confirmed': False}"
+2026-04-27 10:40:50,414 INFO execute_command intent='volume_control' parameters="{'action': 'down'}" confirmed='False' success='True' message='Volume decreased'
+2026-04-27 10:40:50,456 INFO client_log level='info' event='execute_command_response' message='Volume decreased' details="{'intent': 'volume_control', 'parameters': {'action': 'down'}, 'confirmed': False, 'result': {'message': 'Volume decreased', 'success': True}}"
+2026-04-27 10:40:54,612 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'open chatgpt'}"
+2026-04-27 10:40:54,616 INFO process_command user_input='open chatgpt' intent='open_app' response='chatgpt खोल रहा हूं।' parameters="{'app': 'chatgpt'}"
+2026-04-27 10:40:54,629 INFO client_log level='info' event='process_command_response' message='chatgpt खोल रहा हूं।' details="{'text': 'open chatgpt', 'intent': 'open_app'}"
+2026-04-27 10:40:54,630 INFO client_log level='info' event='execute_command_request' message='Sending execute command request' details="{'intent': 'open_app', 'parameters': {'app': 'chatgpt'}, 'confirmed': False}"
+2026-04-27 10:40:55,656 INFO open_url_success url='https://chat.openai.com' browser='msedge' mode='startfile-browser-process-running'
+2026-04-27 10:40:55,657 INFO execute_command intent='open_app' parameters="{'app': 'chatgpt'}" confirmed='False' success='True' message='Opened chatgpt'
+2026-04-27 10:40:55,675 INFO client_log level='info' event='execute_command_response' message='Opened chatgpt' details="{'intent': 'open_app', 'parameters': {'app': 'chatgpt'}, 'confirmed': False, 'result': {'message': 'Opened chatgpt', 'success': True}}"
+2026-04-27 10:41:04,757 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'hello there'}"
+2026-04-27 10:41:07,993 INFO process_command user_input='hello there' intent='general_query' response='नमस्ते! कैसे मदद कर सकता हूँ?' parameters='{}'
+2026-04-27 10:41:08,008 INFO client_log level='info' event='process_command_response' message='नमस्ते! कैसे मदद कर सकता हूँ?' details="{'text': 'hello there', 'intent': 'general_query'}"
+2026-04-27 10:41:10,723 INFO client_log level='info' event='process_command_request' message='Sending process command request' details="{'text': 'tell me a joke'}"
+2026-04-27 10:41:14,855 INFO process_command user_input='tell me a joke' intent='general_query' response='एक आदमी डॉक्टर के पास गया और बोला, "डॉक्टर साहब, मुझे भूलने की बीमारी हो गई है।"  \nडॉक्टर ने पूछा, "कब से?"  \nआदमी बोला, "कब से क्या?"' parameters='{}'
+2026-04-27 10:41:14,877 INFO client_log level='info' event='process_command_response' message='एक आदमी डॉक्टर के पास गया और बोला, "डॉक्टर साहब, मुझे भूलने की बीमारी हो गई है।"  \nडॉक्टर ने पूछा, "कब से?"  \nआदमी बोला, "कब से क्या?"' details="{'text': 'tell me a joke', 'intent': 'general_query'}"

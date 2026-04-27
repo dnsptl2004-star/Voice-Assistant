@@ -62,6 +62,7 @@ const App = () => {
   const [transcriptConfidence, setTranscriptConfidence] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [showTranscriptVerification, setShowTranscriptVerification] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
   const [commandAlternatives] = useState([]);
   const [recognitionError, setRecognitionError] = useState(null);
   const [backgroundMode, setBackgroundMode] = useState(true);
@@ -501,34 +502,118 @@ const detectLanguageSwitch = useCallback((command) => {
 }, []);
 
   const speakText = useCallback((text) => {
-    if (!ttsEnabled || !text) return;
+    console.log('[TTS] speakText called with:', text);
+    console.log('[TTS] ttsEnabled:', ttsEnabled);
+    console.log('[TTS] userInteracted:', userInteracted);
+    
+    if (!ttsEnabled) {
+      console.log('[TTS] TTS is disabled, skipping');
+      return;
+    }
+    
+    if (!text) {
+      console.log('[TTS] No text provided, skipping');
+      return;
+    }
+
+    // Check if speech synthesis is available
+    if (!('speechSynthesis' in window)) {
+      console.error('[TTS] Speech synthesis not supported in this browser');
+      return;
+    }
+
+    console.log('[TTS] Speech synthesis available:', !!window.speechSynthesis);
+
+    // Check if user has interacted with the page (required by some browsers)
+    if (!userInteracted) {
+      console.log('[TTS] User has not interacted yet, TTS may be blocked by browser');
+      // Try anyway, but warn in console
+    }
 
     // Stop recognition when speaking to prevent picking up system voice
     if (recognitionRef.current && recognitionActiveRef.current) {
       try {
         recognitionRef.current.stop();
-        console.log('Stopped recognition while speaking');
+        console.log('[TTS] Stopped recognition while speaking');
       } catch (e) {
-        console.log('Error stopping recognition:', e);
+        console.log('[TTS] Error stopping recognition:', e);
       }
     }
 
     window.speechSynthesis.cancel();
+    console.log('[TTS] Cancelled previous speech');
 
+    // Wait for voices to load if not loaded yet
+    const voices = window.speechSynthesis.getVoices();
+    console.log('[TTS] Available voices:', voices.length);
+    
+    if (voices.length === 0) {
+      console.log('[TTS] Voices not loaded yet, waiting for onvoiceschanged');
+      const loadAndSpeak = () => {
+        const loadedVoices = window.speechSynthesis.getVoices();
+        console.log('[TTS] Voices loaded:', loadedVoices.length);
+        window.speechSynthesis.onvoiceschanged = null;
+        speakTextInternal(text, loadedVoices);
+      };
+      
+      window.speechSynthesis.onvoiceschanged = loadAndSpeak;
+      
+      // Fallback: try to speak after a short delay even if voices don't load
+      setTimeout(() => {
+        if (window.speechSynthesis.onvoiceschanged === loadAndSpeak) {
+          console.log('[TTS] Voices still not loaded, proceeding with default');
+          window.speechSynthesis.onvoiceschanged = null;
+          speakTextInternal(text, []);
+        }
+      }, 1000);
+      
+      return;
+    }
+
+    speakTextInternal(text, voices);
+  }, [ttsEnabled, userInteracted]);
+
+  const speakTextInternal = useCallback((text, voices) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.12;
     utterance.pitch = 1;
     utterance.volume = 1;
+    
+    // Detect if text is Hindi
+    const isHindi = /[\u0900-\u097F]/.test(text);
+    console.log('[TTS] Text is Hindi:', isHindi);
+    
+    // Set language based on text content
+    utterance.lang = isHindi ? 'hi-IN' : 'en-US';
+    console.log('[TTS] Language set to:', utterance.lang);
+
+    // Try to select appropriate voice
+    const targetLang = isHindi ? 'hi' : 'en';
+    const matchingVoice = voices.find(voice => voice.lang.includes(targetLang));
+    
+    if (matchingVoice) {
+      utterance.voice = matchingVoice;
+      console.log('[TTS] Using voice:', matchingVoice.name, `(${matchingVoice.lang})`);
+    } else {
+      console.log('[TTS] No matching voice found, using default');
+      // Use first available voice as fallback
+      if (voices.length > 0) {
+        utterance.voice = voices[0];
+        console.log('[TTS] Using fallback voice:', voices[0].name);
+      }
+    }
 
     utterance.onstart = () => {
+      console.log('[TTS] Speech started');
       speakingRef.current = true;
       setSystemStatus(prev => ({ ...prev, speaking: true }));
     };
 
     utterance.onend = () => {
+      console.log('[TTS] Speech ended');
       speakingRef.current = false;
       setSystemStatus(prev => ({ ...prev, speaking: false }));
-      console.log('Finished speaking, resuming recognition');
+      console.log('[TTS] Finished speaking, resuming recognition');
       // Resume recognition after speaking
       if (keepListeningRef.current && !manualStopRef.current) {
         setTimeout(() => {
@@ -538,7 +623,7 @@ const detectLanguageSwitch = useCallback((command) => {
               try {
                 recognitionRef.current.start();
               } catch (e) {
-                console.log('Error starting recognition:', e);
+                console.log('[TTS] Error starting recognition:', e);
               }
             }
           }
@@ -546,8 +631,30 @@ const detectLanguageSwitch = useCallback((command) => {
       }
     };
 
+    utterance.onerror = (event) => {
+      console.error('[TTS] Speech synthesis error:', event.error);
+      console.error('[TTS] Error details:', event);
+      speakingRef.current = false;
+      setSystemStatus(prev => ({ ...prev, speaking: false }));
+      
+      // Retry with different settings if error occurs
+      if (event.error === 'not-allowed' || event.error === 'interrupted') {
+        console.log('[TTS] Retrying with simpler utterance');
+        setTimeout(() => {
+          const retryUtterance = new SpeechSynthesisUtterance(text);
+          retryUtterance.rate = 1;
+          retryUtterance.pitch = 1;
+          retryUtterance.volume = 1;
+          retryUtterance.lang = 'en-US'; // Fallback to English
+          window.speechSynthesis.speak(retryUtterance);
+        }, 100);
+      }
+    };
+
+    console.log('[TTS] Calling speechSynthesis.speak()');
     window.speechSynthesis.speak(utterance);
-  }, [ttsEnabled]);
+    console.log('[TTS] speak() called successfully');
+  }, []);
 
   const stopAudioVisualization = useCallback(() => {
     if (animationFrameRef.current) {
@@ -1176,6 +1283,64 @@ const detectLanguageSwitch = useCallback((command) => {
     speakTextRef.current = speakText;
     handleCommandRef.current = handleCommandFast;
   }, [handleCommandFast, speakText]);
+
+  // Load voices when they become available (Web Speech API voices load asynchronously)
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      console.log('[TTS] Available voices:', voices.length);
+      const hindiVoices = voices.filter(voice => voice.lang.includes('hi'));
+      console.log('[TTS] Hindi voices available:', hindiVoices.length);
+      if (hindiVoices.length > 0) {
+        console.log('[TTS] Hindi voices:', hindiVoices.map(v => v.name));
+      }
+      console.log('[TTS] All voices:', voices.map(v => `${v.name} (${v.lang})`));
+    };
+
+    // Load voices immediately
+    loadVoices();
+
+    // Also load when voices change (some browsers load voices asynchronously)
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
+  // Test TTS function - can be called from browser console
+  useEffect(() => {
+    window.testTTS = (text = 'नमस्ते, मैं आपका वॉइस असिस्टेंट हूं') => {
+      console.log('[TTS TEST] Testing TTS with:', text);
+      speakText(text);
+    };
+    console.log('[TTS] window.testTTS() available for testing');
+    
+    return () => {
+      delete window.testTTS;
+    };
+  }, [speakText]);
+
+  // Track user interaction to enable TTS (browsers require user interaction)
+  useEffect(() => {
+    const handleInteraction = () => {
+      if (!userInteracted) {
+        console.log('[TTS] User interaction detected, enabling TTS');
+        setUserInteracted(true);
+      }
+    };
+
+    // Add event listeners for various user interactions
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('keydown', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('keydown', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+  }, [userInteracted]);
 
   useEffect(() => {
     checkBackendConnection();
