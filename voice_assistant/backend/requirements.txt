@@ -4,6 +4,3 @@ openai
 requests==2.31.0
 waitress==3.0.0
 python-dotenv==1.2.2
-pyautogui
-keyboard
-screen-brightness-control
