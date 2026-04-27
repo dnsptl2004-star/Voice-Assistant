@@ -8,6 +8,7 @@ Created by Dhruv Patel
 import os
 from dotenv import load_dotenv
 import re
+from functools import lru_cache
 import subprocess
 import time
 import webbrowser
@@ -807,19 +808,22 @@ def build_general_response(user_input):
         return reply("कृपया कुछ बोलें या टाइप करें, मैं आपकी मदद करूंगा।")
 
     if lowered in {"hi", "hello", "hey", "hi assistant", "hello assistant"}:
-        return reply("नमस्ते। मैं आपसे बात कर सकता हूं और साथ ही ऐप्स, वेब, मीडिया, वॉल्यूम और ब्राइटनेस को भी नियंत्रित कर सकता हूं।")
+        return reply("नमस्ते। मैं आपसे बात कर सकता हूं और साथ ही ऐप्स, वेब, मीडिया, वॉल्यूम और ब्राइटनेस को भी नियंत्रित कर सकता हूं। Created by Dhruv Patel")
 
     if "how are you" in lowered or compact in {"howareyou", "howru"}:
-        return reply("मैं अच्छे से काम कर रहा हूं और मदद के लिए तैयार हूं। आप मुझसे सवाल पूछ सकते हैं या लैपटॉप कमांड दे सकते हैं।")
+        return reply("मैं अच्छे से काम कर रहा हूं और मदद के लिए तैयार हूं। आप मुझसे सवाल पूछ सकते हैं या लैपटॉप कमांड दे सकते हैं। Created by Dhruv Patel")
 
     if "thank you" in lowered or "thanks" in lowered:
-        return reply("आपका स्वागत है। मैं मदद के लिए यहां हूं।")
+        return reply("आपका स्वागत है। मैं मदद के लिए यहां हूं। Created by Dhruv Patel")
 
     if "bye" in lowered or "goodbye" in lowered:
-        return reply("अलविदा। जब आपको मदद चाहिए तो मुझे फिर से बुलाएं।")
+        return reply("अलविदा। जब आपको मदद चाहिए तो मुझे फिर से बुलाएं। Created by Dhruv Patel")
 
     if "what can you do" in lowered or compact == "whatcanyoudo" or "help" == lowered:
-        return reply("मैं ऐप्स और वेबसाइट खोल सकता हूं, वेब पर खोज कर सकता हूं, टेक्स्ट टाइप कर सकता हूं, वॉल्यूम, ब्राइटनेस, मीडिया को नियंत्रित कर सकता हूं, और सामान्य सवालों के जवाब दे सकता हूं।")
+        return reply("मैं सवालों के जवाब दे सकता हूं, रिमाइंडर सेट कर सकता हूं, मौसम अपडेट प्रदान कर सकता हूं, कैलेंडर प्रबंधित कर सकता हूं, संदेश भेज सकता हूं, ऐप्स और वेबसाइट खोल सकता हूं, वेब पर खोज कर सकता हूं, टेक्स्ट टाइप कर सकता हूं, वॉल्यूम, ब्राइटनेस, मीडिया को नियंत्रित कर सकता हूं, और बहुत कुछ। बस मुझसे कुछ भी पूछें! Created by Dhruv Patel")
+
+    if "who is your developer" in lowered or "who made you" in lowered or "who created you" in lowered or "who is your creator" in lowered:
+        return reply("My developer is Dhruv Patel. Created by Dhruv Patel")
 
     if "what time is it" in lowered or "current time" in lowered:
         from datetime import datetime
@@ -875,12 +879,12 @@ def build_api_conversation_response(user_input):
     local_response = build_general_response(user_input)
     local_text = (local_response.get("response") or "").strip()
 
-    # Keep tiny conversational turns instant instead of waiting on the API path.
-    if user_input and "local mode" not in local_text.lower():
-        local_response["source"] = "local-fast"
-        local_response["confidence"] = max(local_response.get("confidence", 78), 88)
+    # Return local response for specific questions without calling API
+    lowered = (user_input or "").strip().lower()
+    if "who is your developer" in lowered or "who made you" in lowered or "who created you" in lowered or "who is your creator" in lowered:
         return local_response
 
+    # Call API for all other queries to use vapi
     result = search_voice(user_input)
 
     if not isinstance(result, dict):
@@ -1030,6 +1034,8 @@ def execute_command():
             result = handle_search_web(parameters)
         elif intent == "type_text":
             result = handle_type_text(parameters)
+        elif intent == "type_code":
+            result = handle_type_code(parameters)
         elif intent == "create_file":
             result = handle_create_file(parameters)
         elif intent == "create_folder":
@@ -1485,6 +1491,35 @@ def parse_command_locally(user_input):
 
     if lowered.startswith("type ") or lowered.startswith("write "):
         content = text.split(" ", 1)[1].strip() if " " in text else ""
+        
+        # Check if this is a code generation request
+        code_match = re.search(r"(?:type|write)\s+(?:html|css|javascript|python|java|c\+\+|code)\s+(?:code\s+)?(?:for\s+)?(.+)", lowered, re.IGNORECASE)
+        if code_match:
+            code_request = code_match.group(1).strip()
+            # Use vapi to generate the code
+            code_prompt = f"Generate {code_request}. Provide only the code without any explanation or markdown formatting."
+            try:
+                from voice_search_service import search_voice
+                result = search_voice(code_prompt)
+                if result.get("answer"):
+                    generated_code = result["answer"].strip()
+                    # Remove markdown code blocks if present
+                    if "```" in generated_code:
+                        lines = generated_code.split("\n")
+                        code_lines = []
+                        in_code_block = False
+                        for line in lines:
+                            if line.strip().startswith("```"):
+                                in_code_block = not in_code_block
+                            elif in_code_block or not line.strip().startswith("```"):
+                                code_lines.append(line)
+                        generated_code = "\n".join(code_lines).strip()
+                    return response("type_code", "Generate and type code", f"Generating code for {code_request} and typing it.", {"code": generated_code, "open_notepad": True})
+                else:
+                    return response("type_text", "Type text", f"Typing {content}.", {"text": content})
+            except Exception as e:
+                return response("type_text", "Type text", f"Typing {content}.", {"text": content})
+        
         return response("type_text", "Type text", f"Typing {content}.", {"text": content})
 
     file_match = re.search(r"create file\s+(.+)", lowered)
@@ -2051,6 +2086,32 @@ def handle_type_text(params):
         return {"success": True, "message": f"Typed: {text}"}
     except Exception as e:
         return {"success": False, "message": build_physical_access_error("type text", str(e))}
+
+
+def handle_type_code(params):
+    """Generate code using vapi, open notepad, and type the code."""
+    if not HAS_DISPLAY or pyautogui is None:
+        return {"success": False, "message": "Desktop automation not available in headless environment"}
+    
+    code = params.get("code", "")
+    open_notepad = params.get("open_notepad", True)
+    
+    if not code:
+        return {"success": False, "message": "No code provided"}
+    
+    try:
+        # Open notepad first if requested
+        if open_notepad:
+            import subprocess
+            subprocess.Popen(["notepad.exe"])
+            import time
+            time.sleep(1.5)  # Wait for notepad to open
+        
+        # Type the code
+        pyautogui.typewrite(code, interval=0.01)
+        return {"success": True, "message": "Generated code and typed it in notepad"}
+    except Exception as e:
+        return {"success": False, "message": build_physical_access_error("type code", str(e))}
 
 
 def handle_create_file(params):

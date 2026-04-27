@@ -2,6 +2,7 @@ import os
 import socket
 from pathlib import Path
 from urllib.parse import urlparse
+from functools import lru_cache
 
 import requests
 from dotenv import load_dotenv
@@ -12,13 +13,17 @@ load_dotenv(BASE_DIR / ".env.local", override=True)
 
 FAST_CONNECT_TIMEOUT_SECONDS = 0.35
 REQUEST_TIMEOUT = (0.75, 1.5)
-REMOTE_REQUEST_TIMEOUT = (4, 12)
+REMOTE_REQUEST_TIMEOUT = (3, 8)
 DEFAULT_VAPI_URL = "https://api.vapi.ai"
 DEFAULT_VAPI_MODEL = "gpt-4o-mini"
 DEFAULT_VAULTPROOF_URL = "https://api.vaultproof.dev"
 DEFAULT_VAULTPROOF_PROVIDER = "google"
 DEFAULT_GEMINI_MODEL = "gemini-2.0-flash"
 DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+
+# Simple in-memory cache for search results
+_search_cache = {}
+_cache_max_size = 50
 
 
 def _check_local_endpoint(api_url):
@@ -87,8 +92,8 @@ def _search_via_vapi(query):
             "model": {
                 "provider": "openai",
                 "model": model,
-                "temperature": 0.4,
-                "maxTokens": 90,
+                "temperature": 0.3,
+                "maxTokens": 60,
                 "messages": [
                     {
                         "role": "system",
@@ -152,8 +157,8 @@ def _build_vaultproof_request(query):
                     }
                 ],
                 "generationConfig": {
-                    "temperature": 0.5,
-                    "maxOutputTokens": 180,
+                    "temperature": 0.4,
+                    "maxOutputTokens": 120,
                 },
             },
         }
@@ -178,8 +183,8 @@ def _build_vaultproof_request(query):
                     "content": query,
                 },
             ],
-            "temperature": 0.5,
-            "max_tokens": 180,
+            "temperature": 0.4,
+            "max_tokens": 120,
         },
     }
 
@@ -229,6 +234,11 @@ def _search_via_vaultproof(query):
 
 
 def search_voice(query):
+    # Check cache first
+    cache_key = query.lower().strip()
+    if cache_key in _search_cache:
+        return _search_cache[cache_key]
+
     api_key = (os.getenv("VAPI_API_KEY") or os.getenv("VOICE_SEARCH_API_KEY") or "").strip()
     if not api_key:
         return {"error": "API key not found"}
@@ -236,9 +246,16 @@ def search_voice(query):
     api_url = (os.getenv("VOICE_SEARCH_API_URL") or "").strip()
     preferred_provider = (os.getenv("VOICE_SEARCH_PROVIDER") or "").strip().lower()
 
+    result = None
     if preferred_provider == "vapi" or _looks_like_vapi_key(api_key):
         try:
-            return _search_via_vapi(query)
+            result = _search_via_vapi(query)
+            if result and not result.get("error"):
+                # Cache successful results
+                if len(_search_cache) >= _cache_max_size:
+                    _search_cache.popitem()
+                _search_cache[cache_key] = result
+            return result
         except requests.HTTPError as error:
             status_code = getattr(error.response, "status_code", None)
             if status_code == 401:
@@ -262,7 +279,13 @@ def search_voice(query):
 
     if _looks_like_vaultproof_key(api_key) and (not api_url or _is_local_mock_url(api_url)):
         try:
-            return _search_via_vaultproof(query)
+            result = _search_via_vaultproof(query)
+            if result and not result.get("error"):
+                # Cache successful results
+                if len(_search_cache) >= _cache_max_size:
+                    _search_cache.popitem()
+                _search_cache[cache_key] = result
+            return result
         except requests.Timeout:
             return {
                 "error": "Conversation request timed out",
