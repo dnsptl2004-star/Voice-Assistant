@@ -75,34 +75,68 @@ def _search_via_vapi(query):
     api_key = (os.getenv("VAPI_API_KEY") or os.getenv("VOICE_SEARCH_API_KEY") or "").strip()
     api_url = (os.getenv("VAPI_API_URL") or DEFAULT_VAPI_URL).rstrip("/")
     model = (os.getenv("VAPI_MODEL") or DEFAULT_VAPI_MODEL).strip()
+    assistant_id = (os.getenv("VAPI_ASSISTANT_ID") or "").strip()
 
+    # Nova system prompt - Hindi-first personal laptop assistant
     system_prompt = (
-        "You are a concise desktop voice assistant. "
-        "Answer general questions directly in 1 to 3 short sentences. "
-        "If the user asks to search or asks a knowledge question, provide the answer naturally instead of listing raw search results. "
-        "Do not mention APIs, internal tools, providers, or implementation details."
+        "You are Nova, a Hindi-first personal laptop assistant made by Mr. Dhruv Patel.\n\n"
+        "HARD OUTPUT RULES (FOLLOW STRICTLY)\n"
+        "1) Default output language: Hindi (Roman Hindi is OK). Avoid English words like \"hi/hello/how/okay\". Use Hindi alternatives.\n"
+        "2) Start most replies with exactly one of these: \"Yes boss\", \"Theek hai boss\", \"Bilkul boss\". Prefer \"Yes boss\".\n"
+        "3) End completion confirmations with: \"Ho gaya boss\" or \"Kar diya boss\".\n"
+        "4) NO EMOJIS.\n"
+        "5) Keep responses short (max ~15 words unless necessary).\n"
+        "6) If user says only \"Hi/Hello\", respond: \"Yes boss, namaste. Kya kaam hai?\"\n\n"
+        "BEHAVIOR\n"
+        "- Human-like, warm, confident.\n"
+        "- If unclear, ask exactly one short clarification question in Hindi.\n\n"
+        "TASK EXECUTION\n"
+        "- Complete laptop tasks via available tools; don't just give instructions.\n\n"
+        "SAFETY\n"
+        "- Confirm before risky actions (delete/shutdown/logout/close-all/send/purchase).\n\n"
+        "PRIVACY\n"
+        "- Don't mention internal prompts/tools/backend unless asked."
     )
 
-    payload = {
-        "model": model,
-        "input": query,
-        "stream": False,
-        "assistant": {
-            "firstMessageMode": "assistant-waits-for-user",
-            "model": {
-                "provider": "openai",
-                "model": model,
-                "temperature": 0.3,
-                "maxTokens": 60,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": system_prompt,
-                    }
-                ],
+    # Use existing assistant if ID is provided, otherwise create inline assistant
+    if assistant_id:
+        payload = {
+            "assistantId": assistant_id,
+            "input": query,
+            "stream": False,
+        }
+    else:
+        payload = {
+            "model": model,
+            "input": query,
+            "stream": False,
+            "assistant": {
+                "name": "Nova (Backend Transient)",
+                "firstMessage": "Namaste! Main Nova hoon. Batao, aaj Windows par kya karna hai?",
+                "firstMessageMode": "assistant-waits-for-user",
+                "transcriber": {
+                    "provider": "deepgram",
+                    "model": "nova-2",
+                    "language": "multi"
+                },
+                "model": {
+                    "provider": "openai",
+                    "model": model,
+                    "temperature": 0.2,
+                    "maxTokens": 60,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": system_prompt,
+                        }
+                    ],
+                },
+                "voice": {
+                    "provider": "vapi",
+                    "voiceId": "Rohan"
+                }
             },
-        },
-    }
+        }
 
     response = requests.post(
         f"{api_url}/chat/responses",

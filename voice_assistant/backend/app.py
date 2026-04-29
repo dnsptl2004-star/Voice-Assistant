@@ -22,16 +22,40 @@ HAS_DISPLAY = os.environ.get('DISPLAY') is not None or os.name == 'nt'
 pyautogui = None
 keyboard = None
 sbc = None
+win_input = None
 
 if HAS_DISPLAY:
+    logger = logging.getLogger("voice_assistant")
     try:
         import pyautogui
+    except Exception as e:
+        logger.warning(f"pyautogui not available: {e}")
+        pyautogui = None
+
+    try:
         import keyboard
+    except Exception as e:
+        logger.warning(f"keyboard library not available: {e}")
+        keyboard = None
+
+    try:
         import screen_brightness_control as sbc
     except Exception as e:
-        logger = logging.getLogger("voice_assistant")
-        logger.warning(f"Desktop automation libraries not available: {e}")
-        HAS_DISPLAY = False
+        logger.warning(f"screen_brightness_control not available: {e}")
+        sbc = None
+
+    # Windows fallback input automation via ctypes (handles WinError 2)
+    if os.name == 'nt':
+        try:
+            import win_input
+        except Exception as e:
+            logger.warning(f"win_input fallback not available: {e}")
+            win_input = None
+
+    if pyautogui is None and (win_input is None or not win_input.is_available()):
+        if keyboard is None and (win_input is None or not win_input.is_available()):
+            logger.warning("No desktop input automation available (no pyautogui, keyboard, or win_input)")
+            HAS_DISPLAY = False
 
 from volume_control import set_volume, get_volume
 from voice_search_service import search_voice
@@ -1159,7 +1183,19 @@ def sanitize_spoken_text(value):
 
 
 def build_physical_access_error(action, detail=""):
-    """Build a clearer error for desktop automation failures."""
+    """Build a clearer error for desktop automation failures with diagnostics."""
+    logger = logging.getLogger("voice_assistant")
+    
+    # Log diagnostic info
+    logger.warning(f"Desktop automation failed for: {action}")
+    logger.warning(f"pyautogui available: {pyautogui is not None}")
+    logger.warning(f"keyboard library available: {keyboard is not None}")
+    logger.warning(f"win_input available: {win_input is not None}")
+    logger.warning(f"screen_brightness_control available: {sbc is not None}")
+    logger.warning(f"HAS_DISPLAY: {HAS_DISPLAY}")
+    if detail:
+        logger.warning(f"Error detail: {detail}")
+    
     message = (
         f"{action} नहीं किया जा सका। सुनिश्चित करें कि बैकएंड आपके साइन-इन विंडोज डेस्कटॉप सत्र में चल रहा है "
         "और विंडोज ऐप लॉन्च और इनपुट ऑटोमेशन की अनुमति देता है।"
@@ -2074,15 +2110,17 @@ def handle_search_web(params):
 
 def handle_type_text(params):
     """Type text using keyboard automation."""
-    if not HAS_DISPLAY or pyautogui is None:
-        return {"success": False, "message": "Desktop automation not available in headless environment"}
-    
     text = params.get("text", "")
     if not text:
         return {"success": False, "message": "No text provided"}
     
     try:
-        pyautogui.typewrite(text, interval=0.01)
+        if pyautogui:
+            pyautogui.typewrite(text, interval=0.01)
+        elif win_input:
+            win_input.type_text(text, interval=0.01)
+        else:
+            return {"success": False, "message": build_physical_access_error("type text")}
         return {"success": True, "message": f"Typed: {text}"}
     except Exception as e:
         return {"success": False, "message": build_physical_access_error("type text", str(e))}
@@ -2090,9 +2128,6 @@ def handle_type_text(params):
 
 def handle_type_code(params):
     """Generate code using vapi, open notepad, and type the code."""
-    if not HAS_DISPLAY or pyautogui is None:
-        return {"success": False, "message": "Desktop automation not available in headless environment"}
-    
     code = params.get("code", "")
     open_notepad = params.get("open_notepad", True)
     
@@ -2108,7 +2143,12 @@ def handle_type_code(params):
             time.sleep(1.5)  # Wait for notepad to open
         
         # Type the code
-        pyautogui.typewrite(code, interval=0.01)
+        if pyautogui:
+            pyautogui.typewrite(code, interval=0.01)
+        elif win_input:
+            win_input.type_text(code, interval=0.01)
+        else:
+            return {"success": False, "message": build_physical_access_error("type code")}
         return {"success": True, "message": "Generated code and typed it in notepad"}
     except Exception as e:
         return {"success": False, "message": build_physical_access_error("type code", str(e))}
@@ -2165,23 +2205,40 @@ def handle_delete_file(params, confirmed):
 
 def handle_media_control(params):
     """Control media playback."""
-    if not HAS_DISPLAY or keyboard is None:
-        return {"success": False, "message": "Desktop automation not available in headless environment"}
-    
     action = params.get("action", "").lower()
     
     try:
         if action in ["play", "pause"]:
-            keyboard.press_and_release('play/pause media')
+            if keyboard:
+                keyboard.press_and_release('play/pause media')
+            elif win_input:
+                win_input.media_play_pause()
+            else:
+                return {"success": False, "message": build_physical_access_error("control media")}
             return {"success": True, "message": "Toggled play/pause"}
         elif action == "next":
-            keyboard.press_and_release('next track')
+            if keyboard:
+                keyboard.press_and_release('next track')
+            elif win_input:
+                win_input.media_next()
+            else:
+                return {"success": False, "message": build_physical_access_error("control media")}
             return {"success": True, "message": "Next track"}
         elif action == "previous":
-            keyboard.press_and_release('previous track')
+            if keyboard:
+                keyboard.press_and_release('previous track')
+            elif win_input:
+                win_input.media_prev()
+            else:
+                return {"success": False, "message": build_physical_access_error("control media")}
             return {"success": True, "message": "Previous track"}
         elif action == "stop":
-            keyboard.press_and_release('stop media')
+            if keyboard:
+                keyboard.press_and_release('stop media')
+            elif win_input:
+                win_input.media_stop()
+            else:
+                return {"success": False, "message": build_physical_access_error("control media")}
             return {"success": True, "message": "Stopped media"}
         else:
             return {"success": False, "message": "Unknown media action"}
@@ -2200,19 +2257,28 @@ def handle_volume_control(params):
                 return {"success": False, "message": build_physical_access_error("set volume")}
             return {"success": True, "message": f"Volume set to {level}%"}
         elif action == "mute":
-            if not HAS_DISPLAY or keyboard is None:
-                return {"success": False, "message": "Desktop automation not available in headless environment"}
-            keyboard.press_and_release('volume mute')
+            if keyboard:
+                keyboard.press_and_release('volume mute')
+            elif win_input:
+                win_input.volume_mute()
+            else:
+                return {"success": False, "message": build_physical_access_error("mute volume")}
             return {"success": True, "message": "Volume muted"}
         elif action == "up":
-            if not HAS_DISPLAY or keyboard is None:
-                return {"success": False, "message": "Desktop automation not available in headless environment"}
-            keyboard.press_and_release('volume up')
+            if keyboard:
+                keyboard.press_and_release('volume up')
+            elif win_input:
+                win_input.volume_up()
+            else:
+                return {"success": False, "message": build_physical_access_error("increase volume")}
             return {"success": True, "message": "Volume increased"}
         elif action == "down":
-            if not HAS_DISPLAY or keyboard is None:
-                return {"success": False, "message": "Desktop automation not available in headless environment"}
-            keyboard.press_and_release('volume down')
+            if keyboard:
+                keyboard.press_and_release('volume down')
+            elif win_input:
+                win_input.volume_down()
+            else:
+                return {"success": False, "message": build_physical_access_error("decrease volume")}
             return {"success": True, "message": "Volume decreased"}
         else:
             return {"success": False, "message": "Unknown volume action"}
@@ -2310,28 +2376,52 @@ def handle_screenshot(params):
 
 def handle_window_control(params):
     """Control window operations."""
-    if not HAS_DISPLAY or pyautogui is None:
-        return {"success": False, "message": "Desktop automation not available in headless environment"}
-    
     action = params.get("action", "").lower()
     
     try:
         if action == "minimize":
-            pyautogui.hotkey('win', 'down')
-            time.sleep(0.1)
-            pyautogui.hotkey('win', 'down')
+            if pyautogui:
+                pyautogui.hotkey('win', 'down')
+                time.sleep(0.1)
+                pyautogui.hotkey('win', 'down')
+            elif win_input:
+                win_input.hotkey('win', 'down')
+                time.sleep(0.1)
+                win_input.hotkey('win', 'down')
+            else:
+                return {"success": False, "message": build_physical_access_error("control window")}
             return {"success": True, "message": "Window minimized"}
         elif action == "maximize":
-            pyautogui.hotkey('win', 'up')
+            if pyautogui:
+                pyautogui.hotkey('win', 'up')
+            elif win_input:
+                win_input.hotkey('win', 'up')
+            else:
+                return {"success": False, "message": build_physical_access_error("control window")}
             return {"success": True, "message": "Window maximized"}
         elif action == "restore":
-            pyautogui.hotkey('win', 'down')
+            if pyautogui:
+                pyautogui.hotkey('win', 'down')
+            elif win_input:
+                win_input.hotkey('win', 'down')
+            else:
+                return {"success": False, "message": build_physical_access_error("control window")}
             return {"success": True, "message": "Window restored"}
         elif action == "switch":
-            pyautogui.hotkey('alt', 'tab')
+            if pyautogui:
+                pyautogui.hotkey('alt', 'tab')
+            elif win_input:
+                win_input.hotkey('alt', 'tab')
+            else:
+                return {"success": False, "message": build_physical_access_error("control window")}
             return {"success": True, "message": "Switched to next window"}
         elif action == "show_desktop":
-            pyautogui.hotkey('win', 'd')
+            if pyautogui:
+                pyautogui.hotkey('win', 'd')
+            elif win_input:
+                win_input.hotkey('win', 'd')
+            else:
+                return {"success": False, "message": build_physical_access_error("control window")}
             return {"success": True, "message": "Desktop shown"}
         else:
             return {"success": False, "message": "Unknown window action"}
@@ -2341,20 +2431,32 @@ def handle_window_control(params):
 
 def handle_clipboard(params):
     """Handle clipboard operations."""
-    if not HAS_DISPLAY or pyautogui is None:
-        return {"success": False, "message": "Desktop automation not available in headless environment"}
-    
     action = params.get("action", "").lower()
     
     try:
         if action == "copy":
-            pyautogui.hotkey('ctrl', 'c')
+            if pyautogui:
+                pyautogui.hotkey('ctrl', 'c')
+            elif win_input:
+                win_input.hotkey('ctrl', 'c')
+            else:
+                return {"success": False, "message": build_physical_access_error("control clipboard")}
             return {"success": True, "message": "Content copied to clipboard"}
         elif action == "paste":
-            pyautogui.hotkey('ctrl', 'v')
+            if pyautogui:
+                pyautogui.hotkey('ctrl', 'v')
+            elif win_input:
+                win_input.hotkey('ctrl', 'v')
+            else:
+                return {"success": False, "message": build_physical_access_error("control clipboard")}
             return {"success": True, "message": "Content pasted from clipboard"}
         elif action == "cut":
-            pyautogui.hotkey('ctrl', 'x')
+            if pyautogui:
+                pyautogui.hotkey('ctrl', 'x')
+            elif win_input:
+                win_input.hotkey('ctrl', 'x')
+            else:
+                return {"success": False, "message": build_physical_access_error("control clipboard")}
             return {"success": True, "message": "Content cut to clipboard"}
         else:
             return {"success": False, "message": "Unknown clipboard action"}
@@ -2364,58 +2466,89 @@ def handle_clipboard(params):
 
 def handle_keyboard(params):
     """Handle keyboard shortcuts."""
-    if not HAS_DISPLAY or pyautogui is None:
-        return {"success": False, "message": "Desktop automation not available in headless environment"}
-    
     action = params.get("action", "").lower()
+    
+    # Helper to execute hotkey with fallback
+    def do_hotkey(*keys):
+        if pyautogui:
+            pyautogui.hotkey(*keys)
+        elif win_input:
+            win_input.hotkey(*keys)
+        else:
+            return False
+        return True
     
     try:
         if action == "undo":
-            pyautogui.hotkey('ctrl', 'z')
+            if not do_hotkey('ctrl', 'z'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Undo performed"}
         elif action == "redo":
-            pyautogui.hotkey('ctrl', 'y')
+            if not do_hotkey('ctrl', 'y'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Redo performed"}
         elif action == "save":
-            pyautogui.hotkey('ctrl', 's')
+            if not do_hotkey('ctrl', 's'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "File saved"}
         elif action == "print":
-            pyautogui.hotkey('ctrl', 'p')
+            if not do_hotkey('ctrl', 'p'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Print dialog opened"}
         elif action == "refresh":
-            pyautogui.hotkey('f5')
+            if pyautogui:
+                pyautogui.hotkey('f5')
+            elif win_input:
+                win_input.press_and_release('f5')
+            else:
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Page refreshed"}
         elif action == "find":
-            pyautogui.hotkey('ctrl', 'f')
+            if not do_hotkey('ctrl', 'f'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Find dialog opened"}
         elif action == "select_all":
-            pyautogui.hotkey('ctrl', 'a')
+            if not do_hotkey('ctrl', 'a'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "All content selected"}
         elif action == "new_tab":
-            pyautogui.hotkey('ctrl', 't')
+            if not do_hotkey('ctrl', 't'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "New tab opened"}
         elif action == "new_window":
-            pyautogui.hotkey('ctrl', 'n')
+            if not do_hotkey('ctrl', 'n'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "New window opened"}
         elif action == "close_tab":
-            pyautogui.hotkey('ctrl', 'w')
+            if not do_hotkey('ctrl', 'w'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Tab closed"}
         elif action == "close_window":
-            pyautogui.hotkey('alt', 'f4')
+            if not do_hotkey('alt', 'f4'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Window closed"}
         elif action == "zoom_in":
-            pyautogui.hotkey('ctrl', '+')
+            if not do_hotkey('ctrl', 'plus'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Zoomed in"}
         elif action == "zoom_out":
-            pyautogui.hotkey('ctrl', '-')
+            if not do_hotkey('ctrl', 'minus'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Zoomed out"}
         elif action == "zoom_reset":
-            pyautogui.hotkey('ctrl', '0')
+            if not do_hotkey('ctrl', '0'):
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Zoom reset"}
         elif action == "clear_screen":
             # This is for terminal, send cls command
-            pyautogui.write('cls')
-            pyautogui.press('enter')
+            if pyautogui:
+                pyautogui.write('cls')
+                pyautogui.press('enter')
+            elif win_input:
+                win_input.type_text('cls')
+                win_input.press_and_release('enter')
+            else:
+                return {"success": False, "message": build_physical_access_error("execute keyboard shortcut")}
             return {"success": True, "message": "Screen cleared"}
         else:
             return {"success": False, "message": "Unknown keyboard action"}
